@@ -9,9 +9,7 @@ This repository presents a **One-Way Quantum Key Distribution (1W-QKD)** protoco
 
 These QRW-based approaches aim to enhance the security and efficiency of QKD protocols.
 
----
-
-## Key Features
+### Key features
 
 - **QRWs**:
   - Simulations of QRWs for state preparation and evolution;
@@ -23,8 +21,6 @@ These QRW-based approaches aim to enhance the security and efficiency of QKD pro
 - **Noise robustness**:
   - The protocol models noise and evaluates the impact on quantum error rates (QER).
 
----
-
 ### Simulations
 
 The implementation is available as Jupyter Notebook files (`.ipynb`), providing:
@@ -33,8 +29,6 @@ The implementation is available as Jupyter Notebook files (`.ipynb`), providing:
 - Visualization of key metrics like error rates and noise tolerance.
 
 To run the simulations, simply execute the provided notebooks and modify parameters to explore different scenarios.
-
----
 
 ### Installation and Usage
 
@@ -49,8 +43,6 @@ To run the simulations, simply execute the provided notebooks and modify paramet
 1. Clone the repository and install dependencies;
 2. Open the `.ipynb` files in Jupyter Notebook or JupyterLab;
 3. Execute the cells to view results and analyze the protocol.
-
----
 
 ### Notes
 
