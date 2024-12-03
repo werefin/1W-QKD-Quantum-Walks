@@ -12,7 +12,7 @@ REPO_NAME = "1W-QKD-Quantum-Random-Walks"
 REPO_URL = f"https://{GITHUB_USERNAME}:{GITHUB_PAT}@github.com/{GITHUB_USERNAME}/{REPO_NAME}.git"
 
 # Clone the repository (if not already cloned)
-repo_dir = "/content/" + REPO_NAME + "/results/"
+repo_dir = REPO_NAME + "/results/"
 if not os.path.exists(repo_dir):
     print("Cloning private repository...")
     subprocess.run(["git", "clone", REPO_URL], check=True)
