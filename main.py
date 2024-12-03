@@ -44,7 +44,7 @@ theta = np.pi / 4
 num_iterations = 100
 
 # Initialize noise models
-noise_models = NoiseModels()
+noise_models = Noise_Models()
 p_1q = 3.5e-05  # Parameters for depolarizing channel
 
 # Store results in a dictionary
