@@ -5,6 +5,20 @@ import numpy as np
 from noise_models import Noise_Models
 from qkd_protocol import QKD_Protocol
 
+# Fixed parameters
+F = 'I'
+coin_type = 'generic_rotation'
+phi = 0
+theta = np.pi / 4
+num_iterations = 10000
+
+# Initialize noise models
+noise_models = Noise_Models()
+p_1q = 4e-05  # Parameters for depolarizing channel
+
+# Store results in a dictionary
+results = []
+
 # Clone the private repository
 GITHUB_USERNAME = "Werefin"
 GITHUB_PAT = "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"
@@ -35,20 +49,6 @@ with open(circle_json_path, 'r') as circle_file:
     circle_parameters = json.load(circle_file)
 with open(hypercube_json_path, 'r') as hypercube_file:
     hypercube_parameters = json.load(hypercube_file)
-
-# Fixed parameters
-F = 'I'
-coin_type = 'generic_rotation'
-phi = 0
-theta = np.pi / 4
-num_iterations = 100000
-
-# Initialize noise models
-noise_models = Noise_Models()
-p_1q = 3.5e-05  # Parameters for depolarizing channel
-
-# Store results in a dictionary
-results = []
 
 # Process circle parameters
 print("Processing QKD protocol with QRW circle parameters...")
