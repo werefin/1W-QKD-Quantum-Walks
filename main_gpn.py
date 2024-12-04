@@ -6,7 +6,7 @@ from noise_models import Noise_Models
 from qkd_protocol import QKD_Protocol
 
 # Fixed parameters
-num_iterations = 100000
+num_iterations = 10000
 F = 'I'
 coin_type = 'generic_rotation'
 phi = 0
@@ -14,7 +14,8 @@ theta = np.pi / 4
 
 # Initialize noise models
 noise_models = Noise_Models()
-p_1q = 4e-05  # Parameters for depolarizing channel
+# Parameter for generalized Pauli noise (single qubit)
+p_1q = 0.34
 
 # Store results in a dictionary
 results = []
