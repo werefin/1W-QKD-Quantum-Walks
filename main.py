@@ -41,7 +41,7 @@ F = 'I'
 coin_type = 'generic_rotation'
 phi = 0
 theta = np.pi / 4
-num_iterations = 10000000
+num_iterations = 100000
 
 # Initialize noise models
 noise_models = Noise_Models()
