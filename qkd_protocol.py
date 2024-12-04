@@ -101,7 +101,7 @@ class QKD_Protocol:
         errors = sum(a != b for a, b in zip(alice_bits, bob_bits))
         return errors / len(alice_bits)
 
-    def run_protocol(self, noise_model, shots=10000):
+    def run_protocol(self, noise_model, shots=1):
         """
         Run the full QKD protocol
         Args:
@@ -128,7 +128,7 @@ class QKD_Protocol:
             circuit = transpile(circuit, optimization_level=3)
             # Execute circuit with noise model
             simulator = AerSimulator(noise_model=self.noise_model)
-            job = simulator.run(circuit, noise_model=self.noise_model, shots=self.num_iterations)
+            job = simulator.run(circuit, noise_model=self.noise_model, shots=1)
             result = job.result()
             counts = result.get_counts()
             j_b = int(list(counts.keys())[0], 2) # convert binary string to int
