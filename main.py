@@ -6,11 +6,11 @@ from noise_models import Noise_Models
 from qkd_protocol import QKD_Protocol
 
 # Fixed parameters
+num_iterations = 100000
 F = 'I'
 coin_type = 'generic_rotation'
 phi = 0
 theta = np.pi / 4
-num_iterations = 10000
 
 # Initialize noise models
 noise_models = Noise_Models()
@@ -62,8 +62,8 @@ for entry in circle_parameters:
     print(f"Protocol results for P={P}, optimal_t={optimal_t}:")
     print(f"QER (Z-basis): {result['qer_z']:.6f}")
     print(f"QER (QW-basis): {result['qer_qw']:.6f}")
-    results.append({'type': 'circle', 'P': P, 'F': F, 'coin_type': coin_type, 'phi': phi, 'theta': theta,
-                    't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw']})
+    results.append({'type': 'circle', 'n_iterations': num_iterations, 'P': P, 'F': F, 'coin_type': coin_type,
+                    'phi': phi, 'theta': theta, 't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw']})
 
 # Process hypercube parameters
 print("Processing QKD protocol with QRW hypercube parameters...")
@@ -77,8 +77,8 @@ for entry in hypercube_parameters:
     print(f"Protocol results for P={P}, optimal_t={optimal_t}:")
     print(f"QER (Z-basis): {result['qer_z']:.6f}")
     print(f"QER (QW-basis): {result['qer_qw']:.6f}")
-    results.append({'type': 'hypercube', 'P': P, 'F': F, 'coin_type': coin_type, 'phi': phi, 'theta': theta,
-                    't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw']})
+    results.append({'type': 'hypercube', 'n_iterations': num_iterations, 'P': P, 'F': F, 'coin_type': coin_type,
+                    'phi': phi, 'theta': theta, 't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw']})
 
 # Save results to JSON file
 results_file = os.path.join(repo_dir, '1w_qkd_simulation_results.json')
