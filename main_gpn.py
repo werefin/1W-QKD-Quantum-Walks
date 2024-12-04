@@ -15,7 +15,7 @@ theta = np.pi / 4
 # Initialize noise models
 noise_models = Noise_Models()
 # Parameter for generalized Pauli noise (single qubit)
-p_1q = 0.34
+p_1q = 0.333 # approximately uniform in X, Y, Z bit flips
 
 # Store results in a dictionary
 results = []
