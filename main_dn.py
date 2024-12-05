@@ -15,7 +15,7 @@ theta = np.pi / 4
 # Initialize noise models
 noise_models = Noise_Models()
 # Parameter for depolarizing channel (single qubit)
-p_1q = 0.333 # approximately uniform in X, Y, Z bit flips
+p_1q = 0.52 # approximately maximum possible value for QKD protocol to be secure (QER when P=1 < 12%)
 
 # Store results in a dictionary
 results = []
