@@ -44,9 +44,7 @@ where $p_x$, $p_y$, $p_z$ are the probabilities of $X$, $Y$, $Z$ errors.
 
 #### Formal difference
 
-The mathematical difference between the two channels lies in the probability distribution of the Pauli errors.
-
-For a single qubit:
+The mathematical difference between the two channels lies in the probability distribution of the Pauli errors. For a single qubit:
 
   $$
   \mathcal{E}_{\text{d}}(\sigma) = (1 - p) \sigma + \frac{p}{3} \left(X \sigma X^\dagger + Y \sigma Y^\dagger + Z \sigma Z^\dagger \right)
