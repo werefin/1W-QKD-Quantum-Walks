@@ -1,4 +1,3 @@
-
 import numpy as np
 # Import from Qiskit Aer noise module
 from qiskit_aer.noise import (depolarizing_error, thermal_relaxation_error, pauli_error)
