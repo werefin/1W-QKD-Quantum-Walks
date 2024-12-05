@@ -9,7 +9,7 @@ The depolarizing channel models isotropic noise, where a quantum state is replac
 For a single qubit, the depolarizing channel acts on a density matrix $\rho$ as:
 
 $$
-\mathcal{E}(\Rho) = (1 - p) \rho + \frac{p}{3} \left( X \rho X^\dagger + Y \rho Y^\dagger + Z \rho Z^\dagger \right)
+\mathcal{E}(\rho) = (1 - p) \rho + \frac{p}{3} \left( X \rho X^\dagger + Y \rho Y^\dagger + Z \rho Z^\dagger \right)
 $$
 
 where $p$ is the depolarization probability and $X$, $Y$, $Z$ are the Pauli matrices. For a $d$-dimensional system, the depolarizing channel generalizes as:
@@ -33,16 +33,16 @@ where $p_x$, $p_y$, $p_z$ are the probabilities of $X$, $Y$, $Z$ errors.
 #### Key differences
 
 * **Error probabilities**:
-- **Depolarizing channel**: all Pauli errors $X$, $Y$, $Z$ occur with equal probability ($\frac{p}{3}$ for qubits);
-- **Generalized Pauli noise**: each error type has independent probabilities ($p_x$, $p_y$, $p_z$).
+  - **Depolarizing channel**: all Pauli errors $X$, $Y$, $Z$ occur with equal probability ($\frac{p}{3}$ for qubits);
+  - **Generalized Pauli noise**: each error type has independent probabilities ($p_x$, $p_y$, $p_z$).
 
 * **Parameterization**:
-- **Depolarizing channel**: defined by a single parameter $p$;
-- **Generalized Pauli noise**: defined by multiple independent parameters ($p_x$, $p_y$, $p_z$).
+  - **Depolarizing channel**: defined by a single parameter $p$;
+  - **Generalized Pauli noise**: defined by multiple independent parameters ($p_x$, $p_y$, $p_z$).
 
 * **Behavior in higher dimensions**:
-- **Depolarizing channel**: the noise is isotropic, and all generalized Pauli operators have equal probabilities;
-- **Generalized pauli noise**: allows for anisotropic noise with unequal probabilities for different Pauli-like operators.
+  - **Depolarizing channel**: the noise is isotropic, and all generalized Pauli operators have equal probabilities;
+  - **Generalized pauli noise**: allows for anisotropic noise with unequal probabilities for different Pauli-like operators.
 
 #### Formal difference
 
