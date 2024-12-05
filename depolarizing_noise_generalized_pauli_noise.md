@@ -4,16 +4,16 @@ In quantum information theory, both the **depolarizing channel** and **generaliz
 
 #### Depolarizing noise
 
-The depolarizing channel models isotropic noise, where a quantum state is replaced with a maximally mixed state with a certain probability. For a single qubit, the depolarizing channel acts on a density matrix $\rho$ as:
+The depolarizing channel models isotropic noise, where a quantum state is replaced with a maximally mixed state with a certain probability. For a single qubit, the depolarizing channel acts on a density matrix $\sigma$ as:
 
 $$
-\mathcal{E}(\varrho) = (1 - p) \rho + \frac{p}{3} \left( X \rho X^\dagger + Y \rho Y^\dagger + Z \rho Z^\dagger \right)
+\mathcal{E}(\sigma) = (1 - p) \sigma + \frac{p}{3} \left( X \sigma X^\dagger + Y \sigma Y^\dagger + Z \sigma Z^\dagger \right)
 $$
 
 where $p$ is the depolarization probability and $X$, $Y$, $Z$ are the Pauli matrices. For a $d$-dimensional system, the depolarizing channel generalizes as:
 
 $$
-\mathcal{E}(\rho) = (1 - p) \rho + \frac{p}{d^2 - 1} \sum_{i \neq 0} P_i \rho P_i^\dagger
+\mathcal{E}(\sigma) = (1 - p) \sigma + \frac{p}{d^2 - 1} \sum_{i \neq 0} P_i \sigma P_i^\dagger
 $$
 
 where $P_i$ are the generalized Pauli operators.
@@ -23,7 +23,7 @@ where $P_i$ are the generalized Pauli operators.
 The generalized Pauli noise allows for asymmetric noise, where each type of Pauli error $X$, $Y$, $Z$ occurs with different probabilities. For a single qubit, the generalized Pauli noise acts as:
 
 $$
-\mathcal{E}(\rho) = (1 - p_x - p_y - p_z) \rho + p_x X \rho X^\dagger + p_y Y \rho Y^\dagger + p_z Z \rho Z^\dagger
+\mathcal{E}(\sigma) = (1 - p_x - p_y - p_z) \sigma + p_x X \sigma X^\dagger + p_y Y \sigma Y^\dagger + p_z Z \sigma Z^\dagger
 $$
 
 where $p_x$, $p_y$, $p_z$ are the probabilities of $X$, $Y$, $Z$ errors.
@@ -49,11 +49,11 @@ The mathematical difference between the two channels lies in the probability dis
 For a single qubit:
 
   $$
-  \mathcal{E}_{\text{d}}(\rho) = (1 - p) \rho + \frac{p}{3} \left(X \rho X^\dagger + Y \rho Y^\dagger + Z \rho Z^\dagger \right)
+  \mathcal{E}_{\text{d}}(\sigma) = (1 - p) \sigma + \frac{p}{3} \left(X \sigma X^\dagger + Y \sigma Y^\dagger + Z \sigma Z^\dagger \right)
   $$
   
   $$
-  \mathcal{E}_{\text{p}}(\rho) = (1 - p_x - p_y - p_z) \rho + p_x X \rho X^\dagger + p_y Y \rho Y^\dagger + p_z Z \rho Z^\dagger
+  \mathcal{E}_{\text{p}}(\sigma) = (1 - p_x - p_y - p_z) \sigma + p_x X \sigma X^\dagger + p_y Y \sigma Y^\dagger + p_z Z \sigma Z^\dagger
   $$
 
 The difference is apparent when comparing the error probabilities, in fact for a depolarizing channel $p_x = p_y = p_z = \frac{p}{3}$, while for the generalized pauli noise $p_x$, $p_y$, $p_z$ are independent.
