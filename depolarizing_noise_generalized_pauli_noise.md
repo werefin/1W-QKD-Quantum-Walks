@@ -51,13 +51,13 @@ The mathematical difference between the two channels lies in the probability dis
 For a single qubit:
 
   $$
-  \mathcal{E}_{\text{depolarizing}}(\rho) = (1 - p) \rho + \frac{p}{3} \left(X \rho X^\dagger + Y \rho Y^\dagger + Z \rho Z^\dagger \right)
+  \mathcal{E}_{\text{d}}(\rho) = (1 - p) \rho + \frac{p}{3} \left(X \rho X^\dagger + Y \rho Y^\dagger + Z \rho Z^\dagger \right)
   $$
   
   $$
-  \mathcal{E}_{\text{pauli}}(\rho) = (1 - p_X - p_Y - p_Z) \rho + p_X X \rho X^\dagger + p_Y Y \rho Y^\dagger + p_Z Z \rho Z^\dagger
+  \mathcal{E}_{\text{p}}(\rho) = (1 - p_x - p_y - p_z) \rho + p_x X \rho X^\dagger + p_y Y \rho Y^\dagger + p_z Z \rho Z^\dagger
   $$
 
-The difference is apparent when comparing the error probabilities, in fact for a depolarizing channel: p_x = p_y = p_z = \frac{p}{3}\), while for the generalized pauli noise $p_x$, $p_y$, $p_z$ are independent.
+The difference is apparent when comparing the error probabilities, in fact for a depolarizing channel $p_x = p_y = p_z = \frac{p}{3}$, while for the generalized pauli noise $p_x$, $p_y$, $p_z$ are independent.
 
 In conclusion, while the depolarizing channel assumes isotropic noise with equal probabilities for all Pauli errors, generalized Pauli noise provides a more flexible model by allowing asymmetric noise.
