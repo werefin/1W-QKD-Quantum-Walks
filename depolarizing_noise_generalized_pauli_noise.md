@@ -9,7 +9,7 @@ The depolarizing channel models isotropic noise, where a quantum state is replac
 For a single qubit, the depolarizing channel acts on a density matrix $\rho$ as:
 
 $$
-\mathcal{E}(\rho) = (1 - p) \rho + \frac{p}{3} \left( X \rho X^\dagger + Y \rho Y^\dagger + Z \rho Z^\dagger \right)
+\mathcal{E}(\Rho) = (1 - p) \rho + \frac{p}{3} \left( X \rho X^\dagger + Y \rho Y^\dagger + Z \rho Z^\dagger \right)
 $$
 
 where $p$ is the depolarization probability and $X$, $Y$, $Z$ are the Pauli matrices. For a $d$-dimensional system, the depolarizing channel generalizes as:
