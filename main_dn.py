@@ -49,23 +49,24 @@ with open(circle_json_path, 'r') as circle_file:
 with open(hypercube_json_path, 'r') as hypercube_file:
     hypercube_parameters = json.load(hypercube_file)
 
-# Binary search to find lambda for QER (P = 1) < 0.12
-def find_max_lambda_for_qer(P=1, target_qer=0.12, tolerance=1e-3, max_iterations=100):
-    low, high = 0, 0.5 # lambda ranges from 0 to 1
+# Binary search to find lambda for QER (P=1) < 0.12 with high precision
+def find_max_lambda_for_qer(P=1, target_qer=0.12, tolerance=1e-4, max_iterations=100):
+    low, high = 0.3, 0.5
     best_lambda = None
     for _ in range(max_iterations):
         lambda_val = (low + high) / 2
-        noise_model = noise_models.create_depolarizing_noise(d_lambda=lambda_val)
+        noise_model = noise_models.create_depolarizing_nois(d_lambda=lambda_val))
         protocol = QKD_Protocol(num_iterations=num_iterations, P=P, t=1, F=F, coin_type=coin_type, phi=phi, theta=theta, qrw_type='circle', noise_model=noise_model)
         result = protocol.run_protocol(noise_model=noise_model)
         qer_z = result['qer_z']
+        # Check if QER is very close to the target
         if abs(qer_z - target_qer) < tolerance:
             best_lambda = lambda_val
             break
         elif qer_z < target_qer:
-            low = lambda_val
+            low = lambda_val # increase lambda to increase noise
         else:
-            high = lambda_val
+            high = lambda_val # decrease lambda to reduce noise
     return best_lambda
 
 # Find maximum lambda for P = 1
@@ -85,8 +86,9 @@ for entry in circle_parameters:
     print(f"Protocol results for P={P}, optimal_t={optimal_t}:")
     print(f"QER (Z-basis): {result['qer_z']:.6f}")
     print(f"QER (QW-basis): {result['qer_qw']:.6f}")
-    results.append({'type': 'circle', 'n_iterations': num_iterations, 'P': P, 'F': F, 'coin_type': coin_type,
-                    'phi': phi, 'theta': theta, 't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw']})
+    results.append({'type': 'circle', 'n_iterations': num_iterations, 'P': P, 'F': F,
+                    'coin_type': coin_type, 'phi': phi, 'theta': theta, 't': optimal_t,
+                    'qer_z': result['qer_z'], 'qer_qw': result['qer_qw'], 'max_lambda': max_lambda})
 
 # Process hypercube parameters
 print("Processing QKD protocol with QRW hypercube parameters...")
@@ -100,8 +102,9 @@ for entry in hypercube_parameters:
     print(f"Protocol results for P={P}, optimal_t={optimal_t}:")
     print(f"QER (Z-basis): {result['qer_z']:.6f}")
     print(f"QER (QW-basis): {result['qer_qw']:.6f}")
-    results.append({'type': 'hypercube', 'n_iterations': num_iterations, 'P': P, 'F': F, 'coin_type': coin_type,
-                    'phi': phi, 'theta': theta, 't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw']})
+    results.append({'type': 'hypercube', 'n_iterations': num_iterations, 'P': P, 'F': F,
+                    'coin_type': coin_type, 'phi': phi, 'theta': theta, 't': optimal_t,
+                    'qer_z': result['qer_z'], 'qer_qw': result['qer_qw'], 'max_lambda': max_lambda})
 
 # Save results to JSON file
 results_file = os.path.join(repo_dir, '1w_qkd_simulation_results.json')
