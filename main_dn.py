@@ -55,7 +55,7 @@ def find_max_lambda_for_qer(P=1, target_qer=0.12, tolerance=1e-4, max_iterations
     best_lambda = None
     for _ in range(max_iterations):
         lambda_val = (low + high) / 2
-        noise_model = noise_models.create_depolarizing_nois(d_lambda=lambda_val))
+        noise_model = noise_models.create_depolarizing_noise(d_lambda=lambda_val)
         protocol = QKD_Protocol(num_iterations=num_iterations, P=P, t=1, F=F, coin_type=coin_type, phi=phi, theta=theta, qrw_type='circle', noise_model=noise_model)
         result = protocol.run_protocol(noise_model=noise_model)
         qer_z = result['qer_z']
