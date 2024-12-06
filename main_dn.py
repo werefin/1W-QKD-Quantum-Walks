@@ -6,7 +6,7 @@ from noise_models import Noise_Models
 from qkd_protocol import QKD_Protocol
 
 # Fixed parameters
-num_iterations = 100000
+num_iterations = 10000
 F = 'I'
 coin_type = 'generic_rotation'
 phi = 0
