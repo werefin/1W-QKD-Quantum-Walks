@@ -17,17 +17,17 @@ class Noise_Models:
         self.t_1 = 50000  # amplitude damping time
         self.t_2 = 70000  # phase damping time
 
-    def create_depolarizing_noise(self, p_1q):
+    def create_depolarizing_noise(self, d_lambda):
         """
         Create a universal depolarizing noise model that applies to all qubits in the circuit
         Args:
-        p_1q (float): single-qubit depolarizing probability
+        d_lambda (float): depolarizing parameter
         Returns:
         NoiseModel: Qiskit NoiseModel with specified depolarizing errors
         """
         noise_model = NoiseModel()
         # Define single-qubit depolarizing error
-        error_1q = depolarizing_error(p_1q, 1)
+        error_1q = depolarizing_error(d_lambda, 1)
         # Add single-qubit errors to all single-qubit gates
         single_qubit_gates = ['u1', 'u2', 'u3', 'rx', 'ry', 'rz', 'x', 'y', 'z']
         for gate in single_qubit_gates:
