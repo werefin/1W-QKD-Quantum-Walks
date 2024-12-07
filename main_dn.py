@@ -6,7 +6,7 @@ from noise_models import Noise_Models
 from qkd_protocol import QKD_Protocol
 
 # Fixed parameters
-num_iterations = 10000
+num_iterations = 100000
 F = 'I'
 coin_type = 'generic_rotation'
 phi = 0
@@ -50,8 +50,8 @@ with open(hypercube_json_path, 'r') as hypercube_file:
     hypercube_parameters = json.load(hypercube_file)
 
 # Binary search to find lambda for QER (P=1) < 0.12 with high precision
-def find_max_lambda_for_qer(P=1, target_qer=0.12, tolerance=1e-4, max_iterations=100):
-    low, high = 0.3, 0.5
+def find_max_lambda_for_qer(P=1, target_qer=0.12, tolerance=1e-2, max_iterations=100):
+    low, high = 0.1, 0.5
     best_lambda = None
     for _ in range(max_iterations):
         lambda_val = (low + high) / 2
