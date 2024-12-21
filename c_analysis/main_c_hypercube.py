@@ -30,21 +30,18 @@ results = [] # store (P, c, log_inv_c, optimal_t) values
 # Parameters
 phi = 0
 theta = np.pi / 4
-shots = 50000
+shots = 100000
 
 print("P\tmin_c\tlog_2(1/c)\tt")
 print("-" * 38)
-
-# Variable to keep track of the previous optimal_t
-previous_optimal_t = 0
 
 for P in P_values:
     # Set walker initial position
     initial_position = 2 ** (P - 1)
     # Set initial coin value
     initial_coin_value = 0
-    # Define range for t, starting from previous_optimal_t + 1 to guarantee increase in t
-    t_range = range(previous_optimal_t + 1, 50000)
+    # Define range for t
+    t_range = range(1, 50000)
     
     min_c = 0.5
     optimal_t = 1
@@ -57,9 +54,9 @@ for P in P_values:
                           t=t,
                           initial_position=initial_position,
                           initial_coin_value=initial_coin_value,
+                          coin_type='generic_rotation',
                           phi=phi,
                           theta=theta,
-                          coin_type='generic_rotation',
                           F='I')
         probs = qw.get_probabilities(shots=shots)
         c = max(probs.values())
@@ -69,20 +66,12 @@ for P in P_values:
             optimal_t = t
         elif abs(c - previous_c) < significant_threshold:
             # Stop exploring further if there's no significant change
-            break
-            
+            break   
         previous_c = c
-
-    # Ensure optimal_t is greater than the previous one
-    if optimal_t <= previous_optimal_t:
-        optimal_t = previous_optimal_t + 1
 
     log_inv_c = -np.log2(min_c)
     results.append((P, min_c, log_inv_c, optimal_t))
     print(f"{P}\t{min_c:.4f}\t{log_inv_c:.4f}\t{optimal_t}")
-
-    # Update the previous_optimal_t for the next P
-    previous_optimal_t = optimal_t
 
 # Extract P values and their associated probabilities
 P_vals = [p for p, c, _, _ in results]
@@ -92,11 +81,11 @@ probs = [c for p, c, _, _ in results]
 plt.figure(figsize=(12, 8))
 
 # Create bar plot
-bars = plt.bar(range(len(P_vals)), probs, width=0.8, color='blue', alpha=0.7, label='measured_c_values')
+bars = plt.bar(range(len(P_vals)), probs, width=0.8, color='black', alpha=0.7, label='c_values')
 
 # Customize plot
-plt.title('Security parameter $c$ vs hypercube dimension $P$')
-plt.xlabel('Hypercube dimension $P$')
+plt.title('Security parameter $c$ vs position space dimension $P$')
+plt.xlabel('Position space dimension $P$')
 plt.ylabel('Security parameter $c$')
 plt.grid(False)
 plt.legend()
