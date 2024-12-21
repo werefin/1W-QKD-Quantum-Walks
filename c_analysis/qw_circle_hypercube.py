@@ -159,7 +159,7 @@ class QW_Circle:
         state = list(answer.keys())[0]
         return state
 
-    def get_probabilities(self, shots):
+    def get_probabilities(self, shots=50000):
         """
         Get the probability distribution
         Args:
