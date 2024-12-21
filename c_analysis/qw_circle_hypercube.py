@@ -20,9 +20,9 @@ class QW_Circle:
         self.t = t
         self.initial_position = initial_position
         self.initial_coin_value = initial_coin_value
-        self.F = F
         self.phi = phi
         self.theta = theta
+        self.F = F
         self.n_walker_qubits = int(np.ceil(np.log2(2 * self.P))) # number of qubits for the walker
         # Create quantum and classical registers
         self.walker_r = QuantumRegister(self.n_walker_qubits, 'q')
