@@ -4,8 +4,8 @@
 
 This repository presents a **One-Way Quantum Key Distribution (1W-QKD)** protocol that leverages **Quantum Random Walks (QRWs)** on two primary structures:
 
-- **Circles**, where quantum states evolve over a $2P$-dimensional position space;
-- **Hypercubes**, where quantum states occupy a $2^P$-dimensional vertex space.
+- **Circles**, where quantum states evolve over a $2P$ dimensional position space;
+- **Hypercubes**, where quantum states occupy a $2^P$ dimensional vertex space.
 
 These QRW-based approaches aim to enhance the security and efficiency of QKD protocols.
 
