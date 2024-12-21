@@ -45,7 +45,7 @@ for P in P_values:
     
     min_c = 0.5
     optimal_t = 1
-    significant_threshold = 1e-06 # define a threshold for significant change in c
+    significant_threshold = 1e-05 # define a threshold for significant change in c
 
     # Search for optimal t
     previous_c = 1  # start with a value larger than any c
