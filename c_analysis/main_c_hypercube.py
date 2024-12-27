@@ -38,8 +38,6 @@ print("-" * 38)
 for P in P_values:
     # Set walker initial position
     initial_position = 2 ** (P - 1)
-    # Set initial coin value
-    initial_coin_value = 0
     # Define range for t
     t_range = range(1, 50000)
     
@@ -53,11 +51,10 @@ for P in P_values:
         qw = QW_Hypercube(P=P,
                           t=t,
                           initial_position=initial_position,
-                          initial_coin_value=initial_coin_value,
+                          F='I',
                           coin_type='generic_rotation',
                           phi=phi,
-                          theta=theta,
-                          F='I')
+                          theta=theta)
         probs = qw.get_probabilities(shots=shots)
         c = max(probs.values())
         
