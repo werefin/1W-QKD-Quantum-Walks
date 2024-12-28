@@ -2,17 +2,17 @@
 
 ### Overview
 
-This repository presents a **One-Way Quantum Key Distribution (1W-QKD)** protocol that leverages **Quantum Random Walks (QRWs)** on two primary structures:
+This repository presents a **One-Way Quantum Key Distribution (1W-QKD)** protocol that leverages **Quantum Walks (QWs)** on two primary structures:
 
 - **Circles**, where quantum states evolve over a $2P$ dimensional position space;
 - **Hypercubes**, where quantum states occupy a $2^P$ dimensional vertex space.
 
-These QRW-based approaches aim to enhance the security and efficiency of QKD protocols.
+These QW-based approaches aim to enhance the security and efficiency of QKD protocols.
 
 ### Key features
 
-- **QRWs**:
-  - Simulations of QRWs for state preparation and evolution;
+- **QWs**:
+  - Simulations of QWs for state preparation and evolution;
   - Flexible configuration of dimensions and steps.
 
 - **Basis choices**:
@@ -48,4 +48,3 @@ To run the simulations, simply execute the provided notebooks and modify paramet
 
 - The `.ipynb` files contain all simulation code and results;
 - For detailed explanations, refer to inline comments in the notebooks.
-
