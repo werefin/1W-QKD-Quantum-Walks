@@ -3,347 +3,246 @@ import numpy as np
 
 # Qiskit components
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
-from qiskit.quantum_info import Operator, Statevector
-from qiskit_aer import AerSimulator
-from qiskit.visualization import plot_histogram
+from qiskit.quantum_info import Operator
 
-class QRW_Circle_P_QKD:
-    def __init__(self, P, step, coin_type="generic_rotation", F="I", phi=0, theta=np.pi/4):
+class QW_Circle:
+    def __init__(self, P, t, initial_position=0, F='I', phi=0, theta=np.pi/4):
         """
-        Quantum Random Walk on a circle with P positions, based on B. L. Douglas et alt. paper
+        Quantum walk on a circle with 2P positions
         Args:
-        P (int): number of positions on the circle (must be odd)
-        step (int): number of steps to perform in the walk
-        coin_type (str): type of coin operation ('generic_rotation' or 'grover')
-        F (str): operator type for the coin flip ('I', 'X', or 'Y')
-        phi (float): phase parameter for the rotation coin
-        theta (float): rotation angle for the rotation coin
+        P (int): base number of positions on the circle (must be odd); the total number of positions is 2P
+        t (int): number of steps to perform in the walk
+        initial_position (int): initial position of the walker
+        F (string): F operator type. Choose 'I', 'X', or 'Y'
+        phi (float): phase angle for the coin rotation operator
+        theta (float): rotation angle for the coin rotation operator
         """
-        if P % 2 == 0:
-            raise ValueError("P must be odd") # ensure P is odd for a proper circular topology
         self.P = P
-        self.dim = int(np.ceil(np.log2(2 * P))) # calculate the number of qubits required
+        self.t = t
+        self.initial_position = initial_position
+        self.F = F
         self.phi = phi
         self.theta = theta
+        self.n_walker_qubits = int(np.ceil(np.log2(2 * self.P))) # number of qubits for the walker
+        # Create quantum and classical registers
+        self.walker_r = QuantumRegister(self.n_walker_qubits, 'q')
+        self.coin_r = QuantumRegister(1, 'c')
+        self.classic_r = ClassicalRegister(self.n_walker_qubits, 'r')
+        # Initialize the quantum circuit
+        self.circuit = QuantumCircuit(self.walker_r, self.coin_r, self.classic_r)
+        # Build the QRW circuit
+        self._build_circuit()
+
+    def _build_circuit(self):
+        """
+        Build the quantum random walk circuit with the specified parameters
+        """
+        # Initialize the walker and coin qubits
+        self._initialize_circuit()
+        # Apply F operator before evolving the walk
+        self._apply_F()
+        # Add a barrier for clarity
+        self.circuit.barrier()
+        # Perform the specified number of walk steps
+        for step in range(self.t):
+            # Apply the coined walk step
+            self.circuit = self._coined_walk_step(self.circuit, self.walker_r, self.coin_r)
+        # Add a barrier for clarity
+        self.circuit.barrier()
+
+    def _initialize_circuit(self):
+        """
+        Initialize the circuit with the initial position of the walker
+        """
+        # Set the walker to the initial position (in the range 0 to 2P - 1)
+        for i in range(self.n_walker_qubits):
+            if self.initial_position & (1 << i): # check if bit i is set in initial_position
+                self.circuit.x(self.walker_r[self.n_walker_qubits - i - 1])
+        self.circuit.barrier()
+
+    def _apply_F(self):
+        """
+        Apply operator F to the coin qubit at the end of the walk
+        """
+        if self.F == 'I':
+            pass # identity operation, do nothing
+        elif self.F == 'X':
+            self.circuit.x(self.coin_r)
+        elif self.F == 'Y':
+            self.circuit.y(self.coin_r)
+        else:
+            raise ValueError("Invalid operator type. Choose 'I', 'X', or 'Y'")
+
+    def coin_rotation_operator(self, coin_r):
+        """
+        Create a quantum circuit for the coin rotation operator
+        """
+        # Create a quantum circuit for the coin rotation operator
+        q_circuit = QuantumCircuit(len(coin_r))
+        # Apply the rotation to each coin qubit
+        for qubit in range(len(coin_r)):
+            q_circuit.u(self.theta, self.phi, 0, qubit)
+        # Convert the circuit to an operator
+        coin_rotation_operator = Operator(q_circuit)
+        return coin_rotation_operator
+
+    def _coined_walk_step(self, q_circuit, walker_r, coin_r):
+        """
+        Single step of the quantum walk
+        Args:
+        q_circuit (QuantumCircuit): quantum circuit
+        walker_r (QuantumRegister): quantum register containing the walker's position qubits
+        coin_r (QuantumRegister): quantum register containing the coin qubit
+        Returns:
+        Quantum circuit with an added walk step
+        """
+        # Apply the coin rotation (U3 gate)
+        coin_operator = self.coin_rotation_operator(coin_r)
+        q_circuit.unitary(coin_operator, coin_r, label="R")
+        # Shift operations
+        # Right shift (coin is \ket{1}) or left shift (coin is \ket{0})
+        for i in reversed(range(len(walker_r))):
+            controls = [walker_r[v] for v in range(len(walker_r) - 1, i, -1)] # controls are higher bits
+            controls.append(coin_r) # coin qubit as control
+            q_circuit.mcx(controls, walker_r[i]) # multi-controlled X gate for shift
+            if i != 0:
+                q_circuit.x(walker_r[i]) # flip the qubit if necessary
+        # Revert the coin state for left shift (subtraction)
+        q_circuit.x(coin_r)
+        for i in range(len(walker_r)):
+            if i != 0:
+                q_circuit.x(walker_r[i]) # reverse the flip
+            controls = [walker_r[v] for v in range(len(walker_r) - 1, i, -1)] # controls for the next shift
+            controls.append(coin_r) # coin qubit as control
+            q_circuit.mcx(controls, walker_r[i]) # multi-controlled X gate for left move
+        # Revert the coin qubit flip after the subtraction operation
+        q_circuit.x(coin_r)
+        return q_circuit
+class QW_Hypercube:
+    def __init__(self, P, t, initial_position=0, F='I', coin_type='generic_rotation',
+                 phi=0, theta=np.pi/4):
+        """
+        Quantum walk on a hypercube with 2^{P} vertices
+        Args:
+        P (int): dimension of the hypercube (2^{P} vertices)
+        t (int): number of walk steps to perform
+        initial_position (int): initial position of the walker
+        F (string): F operator type. Choose 'I', 'X', or 'Y'
+        coin_type (str): type of coin operation. Choose 'generic_rotation' or 'grover'
+        phi (float): phase angle for the coin rotation operator
+        theta (float): rotation angle for the coin rotation operator
+        """
+        self.P = P
+        self.t = t
+        self.initial_position = initial_position
         self.coin_type = coin_type
+        self.phi = phi
+        self.theta = theta
         self.F = F
-        self.step = step
+        self.n_qubits = int(np.ceil(np.log2(2 ** P)))
+        # Create registers and quantum circuit
+        self.walker_r, self.coin_r, self.classic_r, self.circuit = self.hypercube_walk_circuit(self.n_qubits)
+        # Initialize the quantum circuit
+        self._initialize_states()
+        # Build the quantum random walk circuit
+        self._build_circuit()
 
-    def build_circuit(self, initial_state):
+    def _initialize_states(self):
         """
-        Build the QRW circuit for the given initial state
-        Args:
-        initial_state (int): initial position state
-        Returns:
-        QuantumCircuit: the constructed quantum circuit
+        Initialize the walker's position
         """
-        qnodes = QuantumRegister(self.dim, 'q')
-        qcoin = QuantumRegister(1, 'c')
-        circuit = QuantumCircuit(qnodes, qcoin)
-        # Prepare the initial state i_a
-        for j in range(self.dim):
-            if (initial_state & (1 << j)):
-                circuit.x(qnodes[j])
-        # Add the QRW operations
-        self.add_qrw_operations(circuit, qnodes, qcoin)
-        return circuit
+        # Set the walker to the initial position (in the range 0 to 2^{P} - 1)
+        for i in range(self.n_qubits):
+            if self.initial_position & (1 << i): # check if bit i is set in initial_position
+                self.circuit.x(self.walker_r[self.n_qubits - i - 1])
+        self.circuit.barrier()
 
-    def get_qrw_circuit(self):
+    def hypercube_walk_circuit(self, n_qubits):
         """
-        Build the QRW circuit without initial state preparation
-        Returns:
-        QuantumCircuit: the constructed quantum circuit
+        Create a quantum circuit for hypercube topology
         """
-        qnodes = QuantumRegister(self.dim, 'q')
-        qcoin = QuantumRegister(1, 'c')
-        circuit = QuantumCircuit(qnodes, qcoin)
-        # Add the QRW operations
-        self.add_qrw_operations(circuit, qnodes, qcoin)
-        return circuit
+        walker_r = QuantumRegister(n_qubits, name='q')
+        coin_r = QuantumRegister(n_qubits, name='c')
+        classic_r = ClassicalRegister(n_qubits, name='r')
+        q_circuit = QuantumCircuit(walker_r, coin_r, classic_r)
+        return walker_r, coin_r, classic_r, q_circuit
 
-    def add_qrw_operations(self, circuit, qnodes, qcoin):
+    def coin_rotation_operator(self, coin_r):
         """
-        Add QRW operations to the circuit
+        Create a quantum circuit for the coin rotation operator
         """
-        # Initialize the coin qubit
-        circuit.h(qcoin)
-        # Apply operator F to the coin
-        self.apply_operator_F(circuit, qcoin)
-        # Apply walk steps
-        for _ in range(self.step):
-            self.coin_operation(circuit, qcoin)
-            self.increment_gate(circuit, qnodes, qcoin)
-            self.decrement_gate(circuit, qnodes, qcoin)
+        # Create a quantum circuit for the coin rotation operator
+        q_circuit = QuantumCircuit(len(coin_r))
+        # Apply the rotation to each coin qubit
+        for qubit in range(len(coin_r)):
+            q_circuit.u(self.theta, self.phi, 0, qubit)
+        # Convert the circuit to an operator
+        coin_rotation_operator = Operator(q_circuit)
+        return coin_rotation_operator
 
-    def cnx(self, circuit, *qubits):
+    def grover_coin(self, coin_r):
         """
-        Multi-controlled NOT gate
-        Implements a controlled-NOT gate with multiple control qubits
-        Args:
-        qubits (list): list of control qubits followed by the target qubit
+        Create the Grover coin operator
         """
-        if len(qubits) >= 3:
-            last = qubits[-1] # target qubit
-            # Apply controlled rotations and recursive calls for multi-qubit control
-            circuit.crz(np.pi/2, qubits[-2], qubits[-1])
-            circuit.cp(np.pi/2, qubits[-2], qubits[-1])
-            self.cnx(circuit, *qubits[:-2], qubits[-1]) # recursive call
-            circuit.cp(-np.pi/2, qubits[-2], qubits[-1])
-            self.cnx(circuit, *qubits[:-2], qubits[-1]) # recursive call
-            circuit.crz(-np.pi/2, qubits[-2], qubits[-1])
-        elif len(qubits) == 3:
-            circuit.ccx(*qubits) # apply Toffoli gate
-        elif len(qubits) == 2:
-            circuit.cx(*qubits) # apply CNOT gate
+        matrix_size = 2 ** len(coin_r)
+        grover_matrix = np.full((matrix_size, matrix_size), 2 / matrix_size) - np.eye(matrix_size)
+        return Operator(grover_matrix)
 
-    def increment_gate(self, circuit, qnodes, qcoin):
+    def shift_operator(self, walker_r, coin_r):
         """
-        Increment the walker’s position modulo P
+        Create a quantum circuit for the shift operator
         """
-        # Apply modular increment
-        self.cnx(circuit, qcoin[0], *[qnodes[i] for i in range(len(qnodes))])
-        circuit.barrier()
+        q_circuit = QuantumCircuit(walker_r, coin_r)
+        for i in reversed(range(len(walker_r))):
+            q_circuit.mcx(coin_r, walker_r[i])
+            q_circuit.x(coin_r[-1])
+            for j in range(1, len(coin_r)):
+                if i & ((1 << j) - 1) == 0:
+                    q_circuit.x(coin_r[-(j + 1)])
+        return q_circuit
 
-    def decrement_gate(self, circuit, qnodes, qcoin):
+    def hypercube_walk_step(self, walker_r, coin_r):
         """
-        Decrement the walker’s position modulo P
+        Create a quantum circuit for one step of the hypercube walk
         """
-        # Apply modular decrement
-        circuit.x(qcoin[0])
-        for i in range(len(qnodes)):
-            circuit.x(qnodes[i])
-        self.cnx(circuit, qcoin[0], *[qnodes[i] for i in range(len(qnodes))])
-        for i in range(len(qnodes)):
-            circuit.x(qnodes[i])
-        circuit.x(qcoin[0])
-        circuit.barrier()
+        shift = self.shift_operator(walker_r, coin_r)
+        walk_step = QuantumCircuit(walker_r, coin_r)
+        if self.coin_type == 'generic_rotation':
+            coin_operator = self.coin_rotation_operator(coin_r)
+            walk_step.unitary(coin_operator, coin_r, label="R")
+        elif self.coin_type == 'grover':
+            coin_operator = self.grover_coin(coin_r)
+            walk_step.unitary(coin_operator, coin_r, label="G")
+        walk_step.compose(shift, inplace=True)
+        return walk_step
 
-    def apply_operator_F(self, circuit, qcoin):
+    def apply_F(self, coin_r):
         """
-        Apply operator F to the coin qubit
+        Create an operator for the specified F operator to be applied to the coin register
         """
-        if self.F == "I":
-            pass # identity, do nothing
-        elif self.F == "X":
-            circuit.x(qcoin[0])
-        elif self.F == "Y":
-            circuit.y(qcoin[0])
-        else:
-            raise ValueError("Invalid operator type. Choose 'I', 'X', or 'Y'.")
+        # Create a quantum circuit for the coin operation
+        q_circuit = QuantumCircuit(len(coin_r))
+        # Apply the specified operation to each qubit
+        for qubit in range(len(coin_r)):
+            if self.F == "X":
+                q_circuit.x(qubit)
+            elif self.F == "Y":
+                q_circuit.y(qubit)
+            # Identity operator is the default behavior (no gate added)
+        # Convert the circuit to an operator
+        operator_F = Operator(q_circuit)
+        return operator_F
 
-    def rotation_coin(self, circuit, qcoin):
+    def _build_circuit(self):
         """
-        Apply a generic rotation coin operation to the coin qubit
-        Coin matrix is defined by the angles theta and phi
+        Build the quantum random walk circuit for the hypercube
         """
-        cos_theta = np.cos(self.theta)
-        sin_theta = np.sin(self.theta)
-        exp_iphi = np.exp(1j * self.phi)
-        exp_niphi = np.exp(-1j * self.phi)
-        # Define the coin matrix
-        coin_matrix = np.array([
-            [exp_iphi * cos_theta, exp_iphi * sin_theta],
-            [-exp_niphi * sin_theta, exp_niphi * cos_theta]
-        ])
-        # Apply the unitary transformation
-        circuit.unitary(coin_matrix, [qcoin[0]], label='R')
-
-    def grover_coin(self, circuit, qcoin):
-        """
-        Placeholder for Grover coin operation
-        """
-        return np.eye(2)
-
-    def coin_operation(self, circuit, qcoin):
-        """
-        Apply the selected coin operation to the coin qubit
-        """
-        if self.coin_type == "generic_rotation":
-            self.rotation_coin(circuit, qcoin)
-        elif self.coin_type == "grover":
-            self.grover_coin(circuit, qcoin)
-        else:
-            raise ValueError("Invalid coin type")
-        circuit.barrier()
-
-    def draw_circuit(self, circuit):
-        """
-        Draw the quantum circuit
-        """
-        return circuit.draw('mpl')
-
-class QRW_Hypercube_P_QKD:
-    def __init__(self, P, step, coin_type="generic_rotation", F="I", phi=0, theta=np.pi/4):
-        """
-        Quantum Random Walk on a hypercube with 2**P vertices, based on B. L. Douglas et alt. paper
-        Args:
-        P (int): dimension of the hypercube (2**P vertices)
-        step (int): number of walk steps to perform
-        coin_type (str): type of coin operation to use ('generic_rotation' or 'grover')
-        F (str): operator type for the coin flip ('I', 'X', or 'Y')
-        phi (float): phase parameter for the generic rotation coin
-        theta (float): angle parameter for the generic rotation coin
-        """
-        self.P = P # dimension of the hypercube
-        self.vertices = 2**P # total number of vertices in the hypercube
-        self.F = F # operator applied to the coin qubit
-        self.phi = phi # phase parameter for coin operation
-        self.theta = theta # angle parameter for coin operation
-        self.coin_type = coin_type # type of coin to apply
-        self.step = step
-
-    def build_circuit(self, initial_state):
-        """
-        Build the QRW circuit for the given initial state
-        Args:
-        initial_state (int): initial position state
-        Returns:
-        QuantumCircuit: the constructed quantum circuit
-        """
-        qnodes = QuantumRegister(self.P, 'q')
-        qcoin = QuantumRegister(1, 'c')
-        circuit = QuantumCircuit(qnodes, qcoin)
-        # Prepare the initial state i_a
-        for j in range(self.P):
-            if (initial_state & (1 << j)):
-                circuit.x(qnodes[j])
-        # Add the QRW operations
-        self.add_qrw_operations(circuit, qnodes, qcoin)
-        return circuit
-
-    def get_qrw_circuit(self):
-        """
-        Build the QRW circuit without initial state preparation
-        Returns:
-        QuantumCircuit: the constructed quantum circuit
-        """
-        qnodes = QuantumRegister(self.P, 'q')
-        qcoin = QuantumRegister(1, 'c')
-        circuit = QuantumCircuit(qnodes, qcoin)
-        # Add the QRW operations
-        self.add_qrw_operations(circuit, qnodes, qcoin)
-        return circuit
-
-    def add_qrw_operations(self, circuit, qnodes, qcoin):
-        """
-        Add QRW operations to the circuit
-        """
-        # Initialize the coin qubit
-        circuit.h(qcoin)
-        # Apply operator F to the coin
-        self.apply_operator_F(circuit, qcoin)
-        # Apply walk steps
-        for _ in range(self.step):
-            self.coin_operation(circuit, qcoin)
-            for direction in range(self.P):
-                self.increment_gate(circuit, qnodes, qcoin, direction)
-                self.decrement_gate(circuit, qnodes, qcoin, direction)
-
-    def cnx(self, circuit, *qubits):
-        """
-        Multi-controlled NOT gate
-        Implements a controlled-NOT gate with multiple control qubits
-        Args:
-        qubits (list): list of control qubits followed by the target qubit
-        """
-        if len(qubits) >= 3:
-            last = qubits[-1] # target qubit
-            # Apply controlled rotations and recursive calls for multi-qubit control
-            circuit.crz(np.pi/2, qubits[-2], qubits[-1])
-            circuit.cp(np.pi/2, qubits[-2], qubits[-1])
-            self.cnx(circuit, *qubits[:-2], qubits[-1]) # recursive call
-            circuit.cp(-np.pi/2, qubits[-2], qubits[-1])
-            self.cnx(circuit, *qubits[:-2], qubits[-1]) # recursive call
-            circuit.crz(-np.pi/2, qubits[-2], qubits[-1])
-        elif len(qubits) == 3:
-            circuit.ccx(*qubits) # apply Toffoli gate
-        elif len(qubits) == 2:
-            circuit.cx(*qubits) # apply CNOT gate
-
-    def increment_gate(self, circuit, qnodes, qcoin, direction):
-        """
-        Increment the walker’s position in a specific direction
-        Args:
-        direction (int): dimension of the hypercube in which to increment
-        """
-        qubits = [q for q in qnodes] # qubits representing position
-        qubits.insert(0, qcoin[0]) # insert the coin qubit as a control
-        # Apply multi-controlled NOT gates for increment operation
-        self.cnx(circuit, *qubits)
-        self.cnx(circuit, *qubits[:-1])
-        self.cnx(circuit, *qubits[:-2])
-        circuit.barrier() # add barrier for clarity
-
-    def decrement_gate(self, circuit, qnodes, qcoin, direction):
-        """
-        Decrement the walker’s position in a specific direction
-        Args:
-        direction (int): dimension of the hypercube in which to decrement
-        """
-        qubits = [q for q in qnodes]
-        qubits.insert(0, qcoin[0])
-        # Flip the coin qubit to enable controlled decrement
-        circuit.x(qcoin[0])
-        # Flip the position qubits to prepare for decrement
-        for i in range(self.P):
-            circuit.x(qnodes[i])
-        self.cnx(circuit, *qubits)  # controlled decrement operation
-        # Restore the position qubits
-        for i in range(self.P):
-            circuit.x(qnodes[i])
-        circuit.x(qcoin[0])
-        circuit.barrier()
-
-    def apply_operator_F(self, circuit, qcoin):
-        """
-        Apply operator F to the coin qubit
-        """
-        if self.F == "I":
-            pass # identity, do nothing
-        elif self.F == "X":
-            circuit.x(qcoin[0])
-        elif self.F == "Y":
-            circuit.y(qcoin[0])
-        else:
-            raise ValueError("Invalid operator type. Choose 'I', 'X', or 'Y'.")
-
-    def rotation_coin(self, circuit, qcoin):
-        """
-        Apply a generic rotation coin operation to the coin qubit
-        Coin matrix is defined by the angles theta and phi
-        """
-        cos_theta = np.cos(self.theta)
-        sin_theta = np.sin(self.theta)
-        exp_iphi = np.exp(1j * self.phi)
-        exp_niphi = np.exp(-1j * self.phi)
-        # Define the coin matrix
-        coin_matrix = np.array([
-            [exp_iphi * cos_theta, exp_iphi * sin_theta],
-            [-exp_niphi * sin_theta, exp_niphi * cos_theta]
-        ])
-        # Apply the unitary transformation
-        circuit.unitary(coin_matrix, [qcoin[0]], label='R')
-
-    def grover_coin(self, circuit, qcoin):
-        """
-        Placeholder for Grover coin operation
-        """
-        return np.eye(2)
-
-    def coin_operation(self, circuit, qcoin):
-        """
-        Apply the selected coin operation to the coin qubit
-        """
-        if self.coin_type == "generic_rotation":
-            self.rotation_coin(circuit, qcoin)
-        elif self.coin_type == "grover":
-            self.grover_coin(circuit, qcoin)
-        else:
-            raise ValueError("Invalid coin type")
-        circuit.barrier()
-
-    def draw_circuit(self, circuit):
-        """
-        Draw the quantum circuit
-        """
-        return circuit.draw('mpl')
+        if self.coin_type == 'generic_rotation':
+            # Apply the F operator before evolving the walk
+            self.circuit.unitary(self.apply_F(self.coin_r), self.coin_r, label="F")
+            self.circuit.barrier()
+        # Perform the quantum walk for the specified number of steps
+        for _ in range(self.t):
+            walk_step = self.hypercube_walk_step(self.walker_r, self.coin_r)
+            self.circuit.compose(walk_step, inplace=True)
+        self.circuit.barrier()
