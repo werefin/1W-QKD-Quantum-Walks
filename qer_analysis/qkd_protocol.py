@@ -1,136 +1,143 @@
 import numpy as np
 from qiskit import QuantumRegister, QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
-from qiskit_aer.noise import NoiseModel
-from qrw_qkd import QRW_Circle_P_QKD, QRW_Hypercube_P_QKD
+from qw_circle_hypercube_qkd import QW_Circle, QW_Hypercube
 
-class QKD_Protocol:
-    def __init__(self, num_iterations, P, t, F='I', coin_type='generic_rotation', phi=0, theta=np.pi/4, qrw_type='circle', noise_model=None):
+class QKD_Protocol_QW:
+    def __init__(self, n_iterations, P, t, F='I', coin_type='generic_rotation', phi=0, theta=np.pi/4, qw_type='circle', noise_model=None):
         """
-        Initialize QKD protocol
+        Initialize QKD protocol based on quantum walks
         Args:
-        num_iterations (int): number of protocol iterations
+        n_iterations (int): number of protocol iterations
         P (int): dimension parameter
-        - For circle: 2*P positions (0 to 2*P - 1)
-        - For hypercube: 2**P vertices (0 to 2**P - 1)
+        - For circle: 2P positions (0 to 2P - 1)
+        - For hypercube: 2^{P} vertices (0 to 2^{P} - 1)
         t (int): number of walk steps
         F (str): operator type for the coin flip ('I', 'X', or 'Y')
         coin_type (str): type of coin operation to use ('generic_rotation' or 'grover')
         phi (float): phase parameter for the coin operation
         theta (float): angle parameter for the coin operation
-        qrw_type (str): type of QRW ('circle' or 'hypercube')
+        qw_type (str): type of QW ('circle' or 'hypercube')
         noise_model: Qiskit noise model to use in simulation
         """
-        self.num_iterations = num_iterations
+        self.n_iterations = n_iterations
         self.P = P
         self.t = t
         self.F = F
         self.coin_type = coin_type
         self.phi = phi
         self.theta = theta
-        self.qrw_type = qrw_type
+        self.qw_type = qw_type
         self.noise_model = noise_model
-        # Initialize the appropriate QRW instance
-        if qrw_type == 'circle':
-            self.qrw = QRW_Circle_P_QKD(P=P, step=t, coin_type=coin_type, F=F, phi=phi, theta=theta)
+        # Initialize the appropriate state space size based on qw_type
+        if self.qw_type == 'circle':
             self.state_space_size = 2 * P
-        elif qrw_type == 'hypercube':
-            self.qrw = QRW_Hypercube_P_QKD(P=P, step=t, coin_type=coin_type, F=F, phi=phi, theta=theta)
+        elif self.qw_type == 'hypercube':
             self.state_space_size = 2 ** P
         else:
-            raise ValueError("Invalid QRW type. Choose 'circle' or 'hypercube'.")
+            raise ValueError("Invalid QW type. Choose 'circle' or 'hypercube'")
+        self.n_qubits = int(np.ceil(np.log2(self.state_space_size)))
 
     def prepare_alice_state(self, w_a, i_a):
         """
         Prepare Alice's state based on her random choices
         Args:
         w_a (int): Alice's basis choice (0 for Z-basis, 1 for QW-basis)
-        i_a (int): initial state index for Alice
+        i_a (int): initial state for Alice
         """
-        if isinstance(self.qrw, QRW_Circle_P_QKD):
-            # Circle QRW case
+        if self.qw_type == 'circle':
+            # Circle QW case
             if w_a == 0:
-                # Prepare only the initial state i_a without QRW evolution
-                qnodes = QuantumRegister(self.qrw.dim, 'q')
-                qcoin = QuantumRegister(1, 'c')
-                circuit = QuantumCircuit(qnodes, qcoin)
-                for j in range(self.qrw.dim):
+                # Prepare only the initial state i_a without QW evolution
+                q_init = QuantumRegister(self.n_qubits, 'q')
+                q_circuit = QuantumCircuit(q_init)
+                for j in range(self.n_qubits):
                     if (i_a & (1 << j)): # check if the j-th bit of i_a is set
-                        circuit.x(qnodes[j])
+                        q_circuit.x(q_init[j])
             elif w_a == 1:
                 # Directly use the QRW circuit for the given initial state
-                circuit = self.qrw.build_circuit(i_a)
-        elif isinstance(self.qrw, QRW_Hypercube_P_QKD):
-            # Hypercube QRW case
+                q_circuit = QW_Circle(P=self.P, t=self.t, initial_position=i_a,
+                                      F=self.F, phi=self.phi, theta=self.theta)
+        elif self.qw_type == 'hypercube':
+            # Hypercube QW case
             if w_a == 0:
-                # Prepare only the initial state i_a without QRW evolution
-                qnodes = QuantumRegister(self.P, 'q')
-                qcoin = QuantumRegister(1, 'c')
-                circuit = QuantumCircuit(qnodes, qcoin)
-                for j in range(self.P):
+                # Prepare only the initial state i_a without QW evolution
+                q_init = QuantumRegister(self.n_qubits, 'q')
+                q_circuit = QuantumCircuit(q_init)
+                for j in range(self.n_qubits):
                     if (i_a & (1 << j)): # check if the j-th bit of i_a is set
-                        circuit.x(qnodes[j])
+                        q_circuit.x(q_init[j])
             elif w_a == 1:
-                # Directly use the QRW circuit for the given initial state
-                circuit = self.qrw.build_circuit(i_a)
+                # Directly use the QW circuit for the given initial state
+                q_circuit = QW_Hypercube(P=self.P, t=self.t, initial_position=i_a,
+                                         F=self.F, coin_type=self.coin_type,
+                                         phi=self.phi, theta=self.theta)
         else:
-            raise ValueError("Unsupported QRW type. Supported types are 'circle' and 'hypercube'.")
-        return circuit
+            raise ValueError("Unsupported QW type. Supported types are 'circle' and 'hypercube'")
+        return q_circuit
 
-    def bob_measurement(self, circuit, w_b):
+    def bob_measurement(self, q_circuit, w_b):
         """
         Add Bob's measurement based on his random choice
         Args:
-        circuit (QuantumCircuit): circuit containing Alice's state
+        q_circuit (QuantumCircuit): circuit containing Alice's state
         w_b (int): Bob's basis choice (0 for Z-basis, 1 for QW-basis)
         """
         if w_b == 1:
-            # For QW basis measurement, apply inverse QRW operator
-            qrw_circuit = self.qrw.get_qrw_circuit()
-            circuit.compose(qrw_circuit.inverse(), inplace=True)
+            # For QW basis measurement, apply inverse QW operator
+            if self.qw_type == 'circle':
+                qc_to_invert = QW_Circle(P=self.P, t=self.t, F=self.F, phi=self.phi, theta=self.theta)
+            elif self.qw_type == 'hypercube':
+                qc_to_invert = QW_Hypercube(P=self.P, t=self.t, F=self.F, coin_type=self.coin_type,
+                                            phi=self.phi, theta=self.theta)
+            q_circuit.compose(qc_to_invert.inverse(), inplace=True)
         # Measure all qubits in computational basis
-        circuit.measure_all()
-        return circuit
+        q_circuit.measure(q_circuit.walker_r, reversed(q_circuit.classic_r))
+        return q_circuit
 
     def calculate_error_rate(self, alice_bits, bob_bits):
         """
         Calculate error rate between Alice and Bob's bits
+        Args:
+        alice_bits (list): list of Alice's bits
+        bob_bits (list): list of Bob's bits
+        Returns:
+        float: error rate
         """
         if not alice_bits: # handle empty lists
             return 0.0
         errors = sum(a != b for a, b in zip(alice_bits, bob_bits))
         return errors / len(alice_bits)
 
-    def run_protocol(self, noise_model, shots=1):
+    def run_protocol(self, noise_model):
         """
         Run the full QKD protocol
         Args:
         noise_model: Qiskit noise model to use in simulation
-        shots (int): number of shots per simulation
         Returns:
         dict: results including raw key, error rates, etc
         """
         alice_bits = []
         bob_bits = []
         basis_choices = []
-        for i in range(self.num_iterations):
+        for i in range(self.n_iterations):
             # Alice's random choices
             w_a = np.random.randint(2)
-            # Generate i_A based on the state space size
+            # Generate i_a based on the state space size
             i_a = np.random.randint(self.state_space_size)
             # Bob's random choice
             w_b = np.random.randint(2)
             # Prepare Alice's state
-            circuit = self.prepare_alice_state(w_a, i_a)
+            q_circuit = self.prepare_alice_state(w_a, i_a)
             # Bob's measurement
-            circuit = self.bob_measurement(circuit, w_b)
-            # Transpile before simulation
-            circuit = transpile(circuit, optimization_level=3)
+            q_circuit = self.bob_measurement(q_circuit, w_b)
             # Execute circuit with noise model
-            simulator = AerSimulator(noise_model=self.noise_model)
-            job = simulator.run(circuit, noise_model=self.noise_model, shots=1)
-            result = job.result()
-            counts = result.get_counts()
+            simulator = AerSimulator(max_parallel_experiments=0, max_memory_mb=None, 
+                                     noise_model=self.noise_model)
+            # Transpile before simulation
+            q_circuit = transpile(q_circuit, backend=simulator, optimization_level=1)
+            job = simulator.run(q_circuit, noise_model=self.noise_model, shots=1)
+            counts = job.result().get_counts()
             j_b = int(list(counts.keys())[0], 2) # convert binary string to int
             # Only proceed if bases match and results are valid
             if w_a == w_b and j_b < self.state_space_size:
@@ -146,26 +153,3 @@ class QKD_Protocol:
         q_w = self.calculate_error_rate(alice_qw_bits, bob_qw_bits)
         return {'raw_key_alice': alice_bits, 'raw_key_bob': bob_bits,
                 'basis_choices': basis_choices, 'qer_z': q_z, 'qer_qw': q_w}
-
-    def print_summary(self, results):
-        """
-        Print a summary of the QKD protocol results
-        Args:
-        results (dict): results dictionary from the run_protocol method
-        """
-        print("=== QKD protocol summary ===")
-        print(f"Number of iterations: {self.num_iterations}")
-        print(f"QRW type: {self.qrw_type}")
-        print(f"State space size: {self.state_space_size}")
-        print(f"Coin type: {self.coin_type}")
-        print(f"Walk steps (t): {self.t}")
-        print("--- Key results ---")
-        print(f"QER (Z-basis): {results['qer_z']:.6f}")
-        print(f"QER (QW-basis): {results['qer_qw']:.6f}")
-        print("--- Key statistics ---")
-        print(f"Raw key (Alice): {results['raw_key_alice']}")
-        print(f"Raw key (Bob): {results['raw_key_bob']}")
-        print("--- Basis choices ---")
-        print(f"Z-basis choices: {results['basis_choices'].count(0)}")
-        print(f"QW-basis choices: {results['basis_choices'].count(1)}")
-        print("=============================")
