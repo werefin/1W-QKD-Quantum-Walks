@@ -1,4 +1,4 @@
-## 1W QKD using QRWs on circles and hypercubes
+## 1W QKD using QWs on circles and hypercubes
 
 ### Overview
 
