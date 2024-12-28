@@ -36,9 +36,9 @@ class Noise_Models:
         """
         noise_model = NoiseModel()
         # State space dimension based on qrw_type
-        if qrw_type == 'circle':
+        if qw_type == 'circle':
             total_states = 2 * P
-        elif qrw_type == 'hypercube':
+        elif qw_type == 'hypercube':
             total_states = 2 ** P
         # Compute noise probabilities
         def p_ij(i, j):
