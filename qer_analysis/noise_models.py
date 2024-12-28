@@ -32,7 +32,7 @@ class Noise_Models:
         Args:
         P (int): dimension of the state space
         error_rate (float): probability of each Pauli error
-        qw_type (str): type of QRW circuit ('circle' or 'hypercube')
+        qw_type (str): type of QW circuit ('circle' or 'hypercube')
         """
         noise_model = NoiseModel()
         # State space dimension based on qrw_type
