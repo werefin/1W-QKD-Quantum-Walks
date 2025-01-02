@@ -7,7 +7,7 @@ from qw_circle_hypercube import QW_Hypercube
 
 # Clone the private repository
 GITHUB_USERNAME = "Werefin"
-GITHUB_PAT = "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"
+GITHUB_PAT = "GITHUB_PAT"
 REPO_NAME = "1W-QKD-Quantum-Walks"
 REPO_URL = f"https://{GITHUB_USERNAME}:{GITHUB_PAT}@github.com/{GITHUB_USERNAME}/{REPO_NAME}.git"
 
