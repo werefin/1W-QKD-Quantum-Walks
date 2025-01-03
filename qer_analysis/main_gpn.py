@@ -57,7 +57,7 @@ def find_max_error_rate_for_qer(P=1, target_qer=0.12, tolerance=1e-3, max_iterat
     for _ in range(max_iterations):
         error_rate = (low + high) / 2
         # Create the generalized Pauli noise model with the current error rate
-        noise_model = noise_models.create_generalized_pauli_noise(error_rate=error_rate)
+        noise_model = noise_models.create_generalized_pauli_noise(P=P, error_rate=error_rate, qw_type='circle')
         # Setup the QKD protocol with the specified parameters
         protocol = QKD_Protocol_QW(n_iterations=n_iterations, P=P, t=1, F=F,
                                    coin_type=coin_type, phi=phi, theta=theta,
