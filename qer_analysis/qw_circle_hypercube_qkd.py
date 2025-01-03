@@ -1,6 +1,5 @@
 # Useful imports
 import numpy as np
-
 # Qiskit components
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
 from qiskit.quantum_info import Operator
@@ -118,6 +117,7 @@ class QW_Circle:
         # Revert the coin qubit flip after the subtraction operation
         q_circuit.x(coin_r)
         return q_circuit
+        
 class QW_Hypercube:
     def __init__(self, P, t, initial_position=0, F='I', coin_type='generic_rotation',
                  phi=0, theta=np.pi/4):
