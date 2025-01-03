@@ -78,9 +78,24 @@ class QKD_Protocol_QW:
         q_circuit_obj (QW_Circle or QW_Hypercube): circuit object containing Alice's state
         w_b (int): Bob's basis choice (0 for Z-basis, 1 for QW-basis)
         """
-        q_circuit = q_circuit_obj.q_circuit
-        # Measure on QW-basis or Z-basis
-        q_circuit.measure(q_circuit_obj.walker_r, reversed(q_circuit_obj.classic_r))
+        q_circuit = q_circuit_obj.circuit
+        if w_b == 0:
+            # Bob measures directly in the Z-basis (computational basis)
+            q_circuit.measure(q_circuit_obj.walker_r, reversed(q_circuit_obj.classic_r))
+        elif w_b == 1:
+            # Apply inverse QW and coin operation before measuring
+            if self.qw_type == 'circle':
+                qc_to_invert = QW_Circle(P=self.P, t=self.t, initial_position=0,
+                                         F=self.F, phi=self.phi, theta=self.theta)
+            elif self.qw_type == 'hypercube':
+                qc_to_invert = QW_Hypercube(P=self.P, t=self.t, initial_position=0,
+                                            F=self.F, coin_type=self.coin_type,
+                                            phi=self.phi, theta=self.theta)
+            else:
+                raise ValueError("Unsupported QW type. Supported types are 'circle' and 'hypercube'")
+            q_circuit.compose(qc_to_invert.circuit.inverse(), inplace=True)
+            # Measure in computational basis after applying inverse QW
+            q_circuit.measure(q_circuit_obj.walker_r, reversed(q_circuit_obj.classic_r))
         return q_circuit
 
     def calculate_error_rate(self, alice_bits, bob_bits):
