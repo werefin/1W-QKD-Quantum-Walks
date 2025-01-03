@@ -49,11 +49,8 @@ class QKD_Protocol_QW:
             # Circle QW case
             if w_a == 0:
                 # Prepare only the initial state i_a without QW evolution
-                q_init = QuantumRegister(self.n_qubits, 'q')
-                q_circuit = QuantumCircuit(q_init)
-                for j in range(self.n_qubits):
-                    if (i_a & (1 << j)): # check if the j-th bit of i_a is set
-                        q_circuit.x(q_init[j])
+                q_circuit = QW_Circle(P=self.P, t=0, initial_position=i_a,
+                                      F=self.F, phi=self.phi, theta=self.theta)
             elif w_a == 1:
                 # Directly use the QRW circuit for the given initial state
                 q_circuit = QW_Circle(P=self.P, t=self.t, initial_position=i_a,
@@ -62,11 +59,9 @@ class QKD_Protocol_QW:
             # Hypercube QW case
             if w_a == 0:
                 # Prepare only the initial state i_a without QW evolution
-                q_init = QuantumRegister(self.n_qubits, 'q')
-                q_circuit = QuantumCircuit(q_init)
-                for j in range(self.n_qubits):
-                    if (i_a & (1 << j)): # check if the j-th bit of i_a is set
-                        q_circuit.x(q_init[j])
+                q_circuit = QW_Hypercube(P=self.P, t=0, initial_position=i_a,
+                                         F=self.F, coin_type=self.coin_type,
+                                         phi=self.phi, theta=self.theta)
             elif w_a == 1:
                 # Directly use the QW circuit for the given initial state
                 q_circuit = QW_Hypercube(P=self.P, t=self.t, initial_position=i_a,
@@ -76,13 +71,14 @@ class QKD_Protocol_QW:
             raise ValueError("Unsupported QW type. Supported types are 'circle' and 'hypercube'")
         return q_circuit
 
-    def bob_measurement(self, q_circuit, w_b):
+    def bob_measurement(self, q_circuit_obj, w_b):
         """
         Add Bob's measurement based on his random choice
         Args:
-        q_circuit (QuantumCircuit): circuit containing Alice's state
+        q_circuit_obj (QW_Circle or QW_Hypercube): circuit object containing Alice's state
         w_b (int): Bob's basis choice (0 for Z-basis, 1 for QW-basis)
         """
+        q_circuit = q_circuit_obj.q_circuit
         if w_b == 1:
             # For QW basis measurement, apply inverse QW operator
             if self.qw_type == 'circle':
@@ -92,7 +88,7 @@ class QKD_Protocol_QW:
                                             phi=self.phi, theta=self.theta)
             q_circuit.compose(qc_to_invert.inverse(), inplace=True)
         # Measure all qubits in computational basis
-        q_circuit.measure(q_circuit.walker_r, reversed(q_circuit.classic_r))
+        q_circuit.measure(q_circuit_obj.walker_r, reversed(q_circuit_obj.classic_r))
         return q_circuit
 
     def calculate_error_rate(self, alice_bits, bob_bits):
