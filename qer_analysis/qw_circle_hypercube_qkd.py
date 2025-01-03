@@ -119,12 +119,6 @@ class QW_Circle:
         # Revert the coin qubit flip after the subtraction operation
         q_circuit.x(coin_r)
         return q_circuit
-
-    def inverse(self):
-      """
-      Returns the inverse of the quantum walk circuit
-      """
-      return self.circuit.inverse()
         
 class QW_Hypercube:
     def __init__(self, P, t, initial_position=0, F='I', coin_type='generic_rotation',
@@ -256,9 +250,3 @@ class QW_Hypercube:
         self.circuit.barrier()
         # Return QW circuit
         return self.circuit
-  
-    def inverse(self):
-      """
-      Returns the inverse of the quantum walk circuit
-      """
-      return self.circuit.inverse()
