@@ -20,7 +20,7 @@ results = []
 
 # Clone the private repository
 GITHUB_USERNAME = "Werefin"
-GITHUB_PAT = "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"
+GITHUB_PAT = "GITHUB_PAT"
 REPO_NAME = "1W-QKD-Quantum-Walks"
 REPO_URL = f"https://{GITHUB_USERNAME}:{GITHUB_PAT}@github.com/{GITHUB_USERNAME}/{REPO_NAME}.git"
 
@@ -80,6 +80,9 @@ print(f"Maximum lambda for QER < 0.12: {max_lambda:.6f}")
 print("Processing QKD protocol with QW circle parameters...")
 for entry in circle_parameters:
     P = entry['P']
+    if P > 13:
+        print(f"Stopping simulation for QW circle: P={P} (P > 13)")
+        break
     optimal_t = entry['optimal_t']
     print(f"Starting simulation for QW circle: P={P}, optimal_t={optimal_t}")
     # Create noise model
@@ -101,6 +104,9 @@ for entry in circle_parameters:
 print("Processing QKD protocol with QW hypercube parameters...")
 for entry in hypercube_parameters:
     P = entry['P']
+    if P > 13:
+        print(f"Stopping simulation for QW hypercube: P={P} (P > 13)")
+        break
     optimal_t = entry['optimal_t']
     print(f"Starting simulation for QW hypercube: P={P}, optimal_t={optimal_t}")
     # Create noise model
