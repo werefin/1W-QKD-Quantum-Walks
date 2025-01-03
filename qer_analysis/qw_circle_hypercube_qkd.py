@@ -29,8 +29,8 @@ class QW_Circle:
         self.classic_r = ClassicalRegister(self.n_walker_qubits, 'r')
         # Initialize the quantum circuit
         self.circuit = QuantumCircuit(self.walker_r, self.coin_r, self.classic_r)
-        # Build the QRW circuit
-        self._build_circuit()
+        # Build the QW circuit
+        self.q_circuit = self._build_circuit()
 
     def _build_circuit(self):
         """
@@ -43,11 +43,13 @@ class QW_Circle:
         # Add a barrier for clarity
         self.circuit.barrier()
         # Perform the specified number of walk steps
-        for step in range(self.t):
+        for _ in range(self.t):
             # Apply the coined walk step
             self.circuit = self._coined_walk_step(self.circuit, self.walker_r, self.coin_r)
         # Add a barrier for clarity
         self.circuit.barrier()
+        # Return QW circuit
+        return self.circuit
 
     def _initialize_circuit(self):
         """
@@ -117,6 +119,12 @@ class QW_Circle:
         # Revert the coin qubit flip after the subtraction operation
         q_circuit.x(coin_r)
         return q_circuit
+
+    def inverse(self):
+      """
+      Returns the inverse of the quantum walk circuit
+      """
+      return self.circuit.inverse()
         
 class QW_Hypercube:
     def __init__(self, P, t, initial_position=0, F='I', coin_type='generic_rotation',
@@ -145,7 +153,7 @@ class QW_Hypercube:
         # Initialize the quantum circuit
         self._initialize_states()
         # Build the quantum random walk circuit
-        self._build_circuit()
+        self.q_circuit = self._build_circuit()
 
     def _initialize_states(self):
         """
@@ -246,3 +254,11 @@ class QW_Hypercube:
             walk_step = self.hypercube_walk_step(self.walker_r, self.coin_r)
             self.circuit.compose(walk_step, inplace=True)
         self.circuit.barrier()
+        # Return QW circuit
+        return self.circuit
+  
+    def inverse(self):
+      """
+      Returns the inverse of the quantum walk circuit
+      """
+      return self.circuit.inverse()
