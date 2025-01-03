@@ -59,7 +59,7 @@ def find_max_lambda_for_qer(P=1, target_qer=0.12, tolerance=1e-3, max_iterations
     max_iterations (int): maximum number of binary search iterations
     min_delta (float): minimum difference between low and high to terminate the search
     Returns:
-    float: Maximum lambda value achieving the QER within tolerance
+    float: maximum lambda value achieving the QER within tolerance
     """
     low, high = 0.0, 0.5
     best_lambda = None
