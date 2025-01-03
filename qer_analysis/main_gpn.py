@@ -6,7 +6,7 @@ from noise_models import Noise_Models
 from qkd_protocol import QKD_Protocol_QW
 
 # Fixed parameters
-n_iterations = 100000
+n_iterations = 10000
 F = 'I'
 coin_type = 'generic_rotation'
 phi = 0
@@ -49,11 +49,21 @@ with open(circle_json_path, 'r') as circle_file:
 with open(hypercube_json_path, 'r') as hypercube_file:
     hypercube_parameters = json.load(hypercube_file)
 
-# Binary search to find error_rate for QER (P = 1) < 0.12 with high precision (generalized_pauli_noise)
-def find_max_error_rate_for_qer(P=1, target_qer=0.12, tolerance=1e-3, max_iterations=100):
-    low, high = 0.0, 0.4
+def find_max_error_rate_for_qer(P=1, target_qer=0.12, tolerance=1e-3, max_iterations=100, min_delta=1e-6):
+    """
+    Perform a binary search to find the maximum error rate that achieves QER close to the target
+    Args:
+    P (int): parameter for the protocol
+    target_qer (float): target quantum error rate
+    tolerance (float): acceptable error from the target QER.
+    max_iterations (int): maximum number of binary search iterations
+    min_delta (float): minimum difference between low and high to terminate the search
+    Returns:
+    float: maximum error rate achieving the QER within tolerance
+    """
+    low, high = 0.0, 0.5
     best_error_rate = None
-    closest_qer = float("inf")
+    best_qer_diff = float('inf') # initialize with a large value
     for _ in range(max_iterations):
         error_rate = (low + high) / 2
         # Create the generalized Pauli noise model with the current error rate
@@ -65,17 +75,19 @@ def find_max_error_rate_for_qer(P=1, target_qer=0.12, tolerance=1e-3, max_iterat
         # Run the protocol and obtain the QER
         result = protocol.run_protocol(noise_model=noise_model)
         qer_z = result['qer_z']
-        # Update if QER is closer to the target
-        if abs(qer_z - target_qer) < abs(closest_qer - target_qer):
-            closest_qer = qer_z
+        # Calculate the difference from the target QER
+        qer_diff = abs(qer_z - target_qer)
+        # Update best error rate if this is the closest to the target QER
+        if qer_diff < best_qer_diff or (qer_diff == best_qer_diff and error_rate > best_error_rate):
             best_error_rate = error_rate
-        # Binary search adjustment
+            best_qer_diff = qer_diff
+        # Adjust binary search bounds
         if qer_z < target_qer:
-            low = error_rate # increase error rate
+            low = error_rate # increase error rate to increase noise
         else:
-            high = error_rate # decrease error rate
-        # Stop early if the QER is close enough to the target
-        if abs(qer_z - target_qer) < tolerance:
+            high = error_rate # decrease error rate to reduce noise
+        # Terminate if the range is smaller than the threshold
+        if high - low < min_delta:
             break
     return best_error_rate
 
