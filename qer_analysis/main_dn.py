@@ -6,7 +6,7 @@ from noise_models import Noise_Models
 from qkd_protocol import QKD_Protocol_QW
 
 # Fixed parameters
-n_iterations = 100000
+n_iterations = 10000
 F = 'I'
 coin_type = 'generic_rotation'
 phi = 0
@@ -49,10 +49,21 @@ with open(circle_json_path, 'r') as circle_file:
 with open(hypercube_json_path, 'r') as hypercube_file:
     hypercube_parameters = json.load(hypercube_file)
 
-# Binary search to find lambda for QER (P = 1) < 0.12 with high precision (depolarizing_noise)
-def find_max_lambda_for_qer(P=1, target_qer=0.12, tolerance=1e-3, max_iterations=100):
-    low, high = 0.0, 0.4
+def find_max_lambda_for_qer(P=1, target_qer=0.12, tolerance=1e-3, max_iterations=100, min_delta=1e-6):
+    """
+    Perform a binary search to find the maximum lambda value that achieves QER close to the target
+    Args:
+    P (int): parameter for the protocol
+    target_qer (float): target quantum error rate
+    tolerance (float): acceptable error from the target QER
+    max_iterations (int): maximum number of binary search iterations
+    min_delta (float): minimum difference between low and high to terminate the search
+    Returns:
+    float: Maximum lambda value achieving the QER within tolerance
+    """
+    low, high = 0.0, 0.5
     best_lambda = None
+    best_qer_diff = float('inf')
     for _ in range(max_iterations):
         lambda_val = (low + high) / 2
         noise_model = noise_models.create_depolarizing_noise(d_lambda=lambda_val)
@@ -61,14 +72,20 @@ def find_max_lambda_for_qer(P=1, target_qer=0.12, tolerance=1e-3, max_iterations
                                    qw_type='circle', noise_model=noise_model)
         result = protocol.run_protocol(noise_model=noise_model)
         qer_z = result['qer_z']
-        # Check if QER is very close to the target
-        if abs(qer_z - target_qer) < tolerance:
+        # Calculate the difference from the target
+        qer_diff = abs(qer_z - target_qer)
+        # Update best lambda if this is the closest to the target so far
+        if qer_diff < best_qer_diff or (qer_diff == best_qer_diff and lambda_val > best_lambda):
             best_lambda = lambda_val
-            break
-        elif qer_z < target_qer:
+            best_qer_diff = qer_diff
+        # Adjust the binary search bounds
+        if qer_z < target_qer:
             low = lambda_val # increase lambda to increase noise
         else:
             high = lambda_val # decrease lambda to reduce noise
+        # Terminate if the range is smaller than the threshold
+        if high - low < min_delta:
+            break
     return best_lambda
 
 # Find maximum lambda for P = 1
