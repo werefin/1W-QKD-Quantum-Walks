@@ -117,8 +117,7 @@ for entry in circle_parameters:
     print(f"QER (QW-basis): {result['qer_qw']:.6f}")
     # Store results
     results.append({'type': 'circle', 'P': P, 'F': F, 'coin_type': coin_type, 'phi': phi,
-                    'theta': theta, 't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw'],
-                    'max_error_rate': max_error_rate})
+                    'theta': theta, 't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw']})
 
 # Process hypercube parameters
 print("Processing QKD protocol with QW hypercube parameters...")
@@ -142,8 +141,7 @@ for entry in hypercube_parameters:
     print(f"QER (QW-basis): {result['qer_qw']:.6f}")
     # Store results
     results.append({'type': 'hypercube', 'P': P, 'F': F, 'coin_type': coin_type, 'phi': phi,
-                    'theta': theta, 't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw'],
-                    'max_error_rate': max_error_rate})
+                    'theta': theta, 't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw']})
     
 # Save results to JSON file
 repo_dir = REPO_NAME + "/qer_analysis/qer_results/"
