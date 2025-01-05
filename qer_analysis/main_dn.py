@@ -114,9 +114,9 @@ for entry in circle_parameters:
     print(f"Protocol results for P={P}, optimal_t={optimal_t}:")
     print(f"QER (Z-basis): {result['qer_z']:.6f}")
     print(f"QER (QW-basis): {result['qer_qw']:.6f}")
-    results.append({'type': 'circle', 'n_iterations': n_iterations, 'P': P, 'F': F,
-                    'coin_type': coin_type, 'phi': phi, 'theta': theta, 't': optimal_t,
-                    'qer_z': result['qer_z'], 'qer_qw': result['qer_qw'], 'max_lambda': max_lambda})
+    results.append({'type': 'circle', 'n_iterations': n_iterations, 'P': P,
+                    'F': F, 'coin_type': coin_type, 'phi': phi, 'theta': theta,
+                    't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw']})
 
 print("Processing QKD protocol with QW hypercube parameters...")
 for entry in hypercube_parameters:
@@ -138,9 +138,9 @@ for entry in hypercube_parameters:
     print(f"Protocol results for P={P}, optimal_t={optimal_t}:")
     print(f"QER (Z-basis): {result['qer_z']:.6f}")
     print(f"QER (QW-basis): {result['qer_qw']:.6f}")
-    results.append({'type': 'hypercube', 'n_iterations': n_iterations, 'P': P, 'F': F,
-                    'coin_type': coin_type, 'phi': phi, 'theta': theta, 't': optimal_t,
-                    'qer_z': result['qer_z'], 'qer_qw': result['qer_qw'], 'max_lambda': max_lambda})
+    results.append({'type': 'hypercube', 'n_iterations': n_iterations, 'P': P,
+                    'F': F, 'coin_type': coin_type, 'phi': phi, 'theta': theta,
+                    't': optimal_t, 'qer_z': result['qer_z'], 'qer_qw': result['qer_qw']})
 
 # Save results to JSON file
 repo_dir = REPO_NAME + "/qer_analysis/qer_results/"
