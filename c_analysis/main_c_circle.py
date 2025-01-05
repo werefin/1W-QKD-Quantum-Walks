@@ -68,31 +68,6 @@ for P in P_values:
     results.append((P, min_c, log_inv_c, optimal_t))
     print(f"{P}\t{min_c:.4f}\t{log_inv_c:.4f}\t{optimal_t}")
 
-# Extract P values and their associated probabilities
-P_vals = [p for p, c, _, _ in results]
-probs = [c for p, c, _, _ in results]
-
-# Create figure
-plt.figure(figsize=(12, 8))
-
-# Create bar plot
-bars = plt.bar(range(len(P_vals)), probs, width=0.8, color='black', alpha=0.7, label='measured_c_values')
-
-# Customize plot
-plt.title('Security parameter $c$ vs position space dimension $P$')
-plt.xlabel('Position space dimension $P$')
-plt.ylabel('Security parameter $c$')
-plt.grid(False)
-plt.legend()
-
-# Adjust layout to prevent label cutoff
-plt.tight_layout()
-
-# Save plot to repository results folder
-plot_path = os.path.join(repo_dir, 'c_qw_circle_plot.png')
-plt.savefig(plot_path)
-plt.show()
-
 # Save results to a JSON file
 results_json = [{"P": P, "c": c, "log_2(1/c)": log_c, "optimal_t": t} for P, c, log_c, t in results]
 json_path = os.path.join(repo_dir, 'c_qw_circle_results.json')
