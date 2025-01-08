@@ -145,6 +145,6 @@ for entry in hypercube_parameters:
     
 # Save results to JSON file
 repo_dir = REPO_NAME + "/qer_analysis/qer_results/"
-results_file = os.path.join(repo_dir, '1w_qkd_simulation_results_gpn.json')
+results_file = os.path.join(repo_dir, 'one_way_qkd_simulation_results_gpn.json')
 with open(results_file, 'w') as results_file_obj:
     json.dump(results, results_file_obj, indent=4)
