@@ -1,6 +1,5 @@
 import numpy as np
-# Import from Qiskit Aer noise module
-from qiskit_aer.noise import (depolarizing_error, pauli_error)
+from qiskit_aer.noise import (depolarizing_error, amplitude_damping_error, phase_damping_error)
 from qiskit_aer.noise import NoiseModel
 
 class Noise_Models:
