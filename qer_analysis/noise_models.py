@@ -25,33 +25,22 @@ class Noise_Models:
             noise_model.add_all_qubit_quantum_error(error_1q, gate)
         return noise_model
 
-    def create_generalized_pauli_noise(self, P, error_rate, qw_type='circle'):
+    def create_combined_damping_noise(self, p_amplitude, p_phase):
         """
-        Create a generalized Pauli noise model
-        Models random X, Y, and Z rotations
+        Create a combined amplitude and phase damping noise model
         Args:
-        P (int): dimension of the state space
-        error_rate (float): probability of each Pauli error
-        qw_type (str): type of QW circuit ('circle' or 'hypercube')
+        p_amplitude (float): amplitude parameter damping noise
+        p_phase (float): phase parameter damping noise
+        Returns:
+        NoiseModel: Qiskit NoiseModel implementing both amplitude and phase damping noise
         """
         noise_model = NoiseModel()
-        # State space dimension based on qrw_type
-        if qw_type == 'circle':
-            total_states = 2 * P
-        elif qw_type == 'hypercube':
-            total_states = 2 ** P
-        # Compute noise probabilities
-        def p_ij(i, j):
-            if i == 0 and j == 0:
-                return 1 - error_rate
-            else:
-              return error_rate / ((total_states)**2 - 1)
-        # Verify normalization
-        total_prob = sum(p_ij(i, j) for i in range(total_states) for j in range(total_states))
-        assert np.isclose(total_prob, 1.0), f"Probabilities do not sum to 1: {total_prob}"
-        # Create noise model
-        p_x = p_y = p_z = error_rate / ((total_states)**2 - 1)
-        error_probs = [('X', p_x), ('Y', p_y), ('Z', p_z), ('I', 1 - p_x - p_y - p_z)]
-        error = pauli_error(error_probs)
-        noise_model.add_all_qubit_quantum_error(error, ['u', 'u1', 'u2', 'u3', 'x', 'y', 'z'])
+        # Create amplitude damping error
+        amplitude_damping = amplitude_damping_error(p_amplitude)
+        # Create phase damping error
+        phase_damping = phase_damping_error(p_phase)
+        # Combine two errors: amplitude damping and phase damping
+        combined_error = amplitude_damping.compose(phase_damping)
+        # Add combined error to the noise model for all single-qubit gates
+        noise_model.add_all_qubit_quantum_error(combined_error, ['u', 'u1', 'u2', 'u3', 'x', 'y', 'z'])
         return noise_model
