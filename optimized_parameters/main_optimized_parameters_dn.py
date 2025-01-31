@@ -6,7 +6,7 @@ import sys
 # Add the project root directory to Python's search path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from c_analysis import QW_Circle as QW_Circle_c, QW_Hypercube as QW_Hypercube_c
-from qer_analysis import Noise_Models, QKD_Protocol_QW, QW_Circle, QW_Hypercube
+from qer_analysis import Noise_Models, QKD_Protocol_QW
 
 # Clone the private repository
 GITHUB_USERNAME = "Werefin"
