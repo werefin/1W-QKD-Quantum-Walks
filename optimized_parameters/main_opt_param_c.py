@@ -2,6 +2,8 @@ import numpy as np
 import os
 import json
 import subprocess
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from c_analysis import QW_Circle, QW_Hypercube
 
 # Clone the private repository
