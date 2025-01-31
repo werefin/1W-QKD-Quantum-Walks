@@ -1,7 +1,7 @@
 import numpy as np
 from qiskit import QuantumRegister, QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
-from qw_circle_hypercube_qkd import QW_Circle_QKD, QW_Hypercube_QKD
+from qw_circle_hypercube_qkd import QW_Circle, QW_Hypercube
 
 class QKD_Protocol_QW:
     def __init__(self, n_iterations, P, t, F='I', coin_type='generic_rotation', phi=0, theta=np.pi/4, qw_type='circle', noise_model=None):
@@ -49,24 +49,24 @@ class QKD_Protocol_QW:
             # Circle QW case
             if w_a == 0:
                 # Prepare only the initial state i_a without QW evolution
-                q_circuit = QW_Circle_QKD(P=self.P, t=0, initial_position=i_a,
-                                          F=self.F, phi=self.phi, theta=self.theta)
+                q_circuit = QW_Circle(P=self.P, t=0, initial_position=i_a,
+                                      F=self.F, phi=self.phi, theta=self.theta)
             elif w_a == 1:
                 # Directly use the QRW circuit for the given initial state
-                q_circuit = QW_Circle_QKD(P=self.P, t=self.t, initial_position=i_a,
-                                          F=self.F, phi=self.phi, theta=self.theta)
+                q_circuit = QW_Circle(P=self.P, t=self.t, initial_position=i_a,
+                                      F=self.F, phi=self.phi, theta=self.theta)
         elif self.qw_type == 'hypercube':
             # Hypercube QW case
             if w_a == 0:
                 # Prepare only the initial state i_a without QW evolution
-                q_circuit = QW_Hypercube_QKD(P=self.P, t=0, initial_position=i_a,
-                                             F=self.F, coin_type=self.coin_type,
-                                             phi=self.phi, theta=self.theta)
+                q_circuit = QW_Hypercube(P=self.P, t=0, initial_position=i_a,
+                                         F=self.F, coin_type=self.coin_type,
+                                         phi=self.phi, theta=self.theta)
             elif w_a == 1:
                 # Directly use the QW circuit for the given initial state
-                q_circuit = QW_Hypercube_QKD(P=self.P, t=self.t, initial_position=i_a,
-                                             F=self.F, coin_type=self.coin_type,
-                                             phi=self.phi, theta=self.theta)
+                q_circuit = QW_Hypercube(P=self.P, t=self.t, initial_position=i_a,
+                                         F=self.F, coin_type=self.coin_type,
+                                         phi=self.phi, theta=self.theta)
         else:
             raise ValueError("Unsupported QW type. Supported types are 'circle' and 'hypercube'")
         return q_circuit
@@ -75,7 +75,7 @@ class QKD_Protocol_QW:
         """
         Add Bob's measurement based on his random choice
         Args:
-        q_circuit_obj (QW_Circle_QKD or QW_Hypercube_QKD): circuit object containing Alice's state
+        q_circuit_obj (QW_Circle or QW_Hypercube): circuit object containing Alice's state
         w_b (int): Bob's basis choice (0 for Z-basis, 1 for QW-basis)
         """
         q_circuit = q_circuit_obj.circuit
@@ -85,12 +85,12 @@ class QKD_Protocol_QW:
         elif w_b == 1:
             # Apply inverse QW and coin operation before measuring
             if self.qw_type == 'circle':
-                qc_to_invert = QW_Circle_QKD(P=self.P, t=self.t, initial_position=0,
-                                             F=self.F, phi=self.phi, theta=self.theta)
+                qc_to_invert = QW_Circle(P=self.P, t=self.t, initial_position=0,
+                                         F=self.F, phi=self.phi, theta=self.theta)
             elif self.qw_type == 'hypercube':
-                qc_to_invert = QW_Hypercube_QKD(P=self.P, t=self.t, initial_position=0,
-                                                F=self.F, coin_type=self.coin_type,
-                                                phi=self.phi, theta=self.theta)
+                qc_to_invert = QW_Hypercube(P=self.P, t=self.t, initial_position=0,
+                                            F=self.F, coin_type=self.coin_type,
+                                            phi=self.phi, theta=self.theta)
             else:
                 raise ValueError("Unsupported QW type. Supported types are 'circle' and 'hypercube'")
             q_circuit.compose(qc_to_invert.circuit.inverse(), inplace=True)

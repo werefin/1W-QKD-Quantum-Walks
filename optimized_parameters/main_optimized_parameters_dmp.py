@@ -2,9 +2,6 @@ import numpy as np
 import os
 import json
 import subprocess
-import sys
-# Add the project root directory to Python's search path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from c_analysis import QW_Circle, QW_Hypercube
 from qer_analysis import Noise_Models, QKD_Protocol_QW
 
@@ -33,6 +30,7 @@ F_values = ['I', 'X', 'Y']
 phi_values = [k * np.pi / 10 for k in range(11)]
 theta_values = [k * np.pi / 10 for k in range(11)]
 shots = 100000
+n_iterations = 100000
 
 # Initialize noise models
 noise_models = Noise_Models()
@@ -161,7 +159,7 @@ for P in P_values:
         # Calculate QER for the best configuration
         noise_model = noise_models.create_combined_damping_noise(p_amplitude=max_p_amplitude,
                                                                  p_phase=max_p_phase)
-        protocol = QKD_Protocol_QW(n_iterations=100000, P=P, t=optimal_t, F=F, coin_type='generic_rotation', phi=phi, theta=theta, qw_type=type, noise_model=noise_model)
+        protocol = QKD_Protocol_QW(n_iterations=n_iterations, P=P, t=optimal_t, F=F, coin_type='generic_rotation', phi=phi, theta=theta, qw_type=type, noise_model=noise_model)
         result = protocol.run_protocol(noise_model=noise_model)
         qer_z = result['qer_z']
         qer_qw = result['qer_qw']
