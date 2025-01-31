@@ -75,8 +75,8 @@ def find_max_parameters_for_damping(P=1, target_qer=0.12, tolerance=1e-3, max_it
         noise_model = noise_models.create_combined_damping_noise(p_amplitude=p_amplitude,
                                                                  p_phase=p_phase)
         # Setup the QKD protocol with the specified parameters
-        protocol = QKD_Protocol_QW(n_iterations=n_iterations, P=P, t=1, F=F,
-                                   coin_type=coin_type, phi=phi, theta=theta,
+        protocol = QKD_Protocol_QW(n_iterations=n_iterations, P=P, t=1, F='I',
+                                   coin_type=coin_type, phi=0, theta=0,
                                    qw_type='circle', noise_model=noise_model)
         # Run the protocol and obtain the QER
         result = protocol.run_protocol(noise_model=noise_model)
