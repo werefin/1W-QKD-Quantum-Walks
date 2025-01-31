@@ -5,8 +5,8 @@ import subprocess
 import sys
 # Add the project root directory to Python's search path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from c_analysis import QW_Circle_c, QW_Hypercube_c
-from qer_analysis import Noise_Models, QKD_Protocol_QW, QW_Circle, QW_Hypercube
+from c_analysis import QW_Circle, QW_Hypercube
+from qer_analysis import Noise_Models, QKD_Protocol_QW
 
 # Clone the private repository
 GITHUB_USERNAME = "Werefin"
@@ -126,9 +126,9 @@ for P in P_values:
                     # Find the best c for the current topology
                     for t in range(1, 50000):
                         if type == 'circle':
-                            qw = QW_Circle_c(P=P, t=t, initial_position=P, F=F, phi=phi, theta=theta)
+                            qw = QW_Circle(P=P, t=t, initial_position=P, F=F, phi=phi, theta=theta)
                         elif type == 'hypercube':
-                            qw = QW_Hypercube_c(P=P, t=t, initial_position=2**(P - 1), F=F, coin_type='generic_rotation', phi=phi, theta=theta)
+                            qw = QW_Hypercube(P=P, t=t, initial_position=2**(P - 1), F=F, coin_type='generic_rotation', phi=phi, theta=theta)
                         probs = qw.get_probabilities(shots=shots)
                         c = max(probs.values())
                         if c < min_c:

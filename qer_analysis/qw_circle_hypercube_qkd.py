@@ -4,7 +4,7 @@ import numpy as np
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, transpile
 from qiskit.quantum_info import Operator
 
-class QW_Circle:
+class QW_Circle_QKD:
     def __init__(self, P, t, initial_position=0, F='I', phi=0, theta=np.pi/4):
         """
         Quantum walk on a circle with 2P positions
@@ -120,7 +120,7 @@ class QW_Circle:
         q_circuit.x(coin_r)
         return q_circuit
         
-class QW_Hypercube:
+class QW_Hypercube_QKD:
     def __init__(self, P, t, initial_position=0, F='I', coin_type='generic_rotation',
                  phi=0, theta=np.pi/4):
         """
