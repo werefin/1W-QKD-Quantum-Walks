@@ -2,9 +2,8 @@ import numpy as np
 import json
 import os
 import subprocess
-from c_analysis.qw_circle_hypercube import QW_Circle, QW_Hypercube
-from qer_analysis.noise_models import Noise_Models
-from qer_analysis.qkd_protocol import QKD_Protocol_QW
+from c_analysis import QW_Circle, QW_Hypercube
+from qer_analysis import Noise_Models, QKD_Protocol_QW
 
 # Clone the private repository
 GITHUB_USERNAME = "Werefin"
