@@ -15,9 +15,6 @@ REPO_URL = f"https://{GITHUB_USERNAME}:{GITHUB_PAT}@github.com/{GITHUB_USERNAME}
 repo_dir = os.path.abspath(os.path.join(REPO_NAME, "optimized_parameters", "optimal_results"))
 best_results_path = os.path.join(repo_dir, 'optimized_parameters_c.json')
 
-# Print the repository directory path
-print(f"Looking for optimized results in: {repo_dir}")
-
 # Clone the repository (if not already cloned)
 if not os.path.exists(REPO_NAME):
     print("Cloning private repository...")
@@ -27,7 +24,6 @@ else:
     print("Repository already cloned...")
 
 # Load best optimized parameters from JSON
-print(f"Looking for best results file at: {best_results_path}")
 if os.path.exists(best_results_path):
     with open(best_results_path, 'r') as f:
         best_results = json.load(f)
