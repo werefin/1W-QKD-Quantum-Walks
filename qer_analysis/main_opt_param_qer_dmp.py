@@ -11,8 +11,14 @@ GITHUB_PAT = "GITHUB_PAT"
 REPO_NAME = "1W-QKD-Quantum-Walks"
 REPO_URL = f"https://{GITHUB_USERNAME}:{GITHUB_PAT}@github.com/{GITHUB_USERNAME}/{REPO_NAME}.git"
 
+# Define the directory for optimized results
+repo_dir = os.path.abspath(os.path.join(REPO_NAME, "optimized_parameters", "optimal_results"))
+best_results_path = os.path.join(repo_dir, 'optimized_parameters_c.json')
+
+# Print the repository directory path
+print(f"Looking for optimized results in: {repo_dir}")
+
 # Clone the repository (if not already cloned)
-repo_dir = os.path.join(REPO_NAME, "/optimized_parameters/optimal_results/")
 if not os.path.exists(REPO_NAME):
     print("Cloning private repository...")
     subprocess.run(["git", "clone", REPO_URL], check=True)
@@ -21,12 +27,13 @@ else:
     print("Repository already cloned...")
 
 # Load best optimized parameters from JSON
-best_results_path = os.path.join(repo_dir, 'optimized_parameters_c.json')
+print(f"Looking for best results file at: {best_results_path}")
 if os.path.exists(best_results_path):
     with open(best_results_path, 'r') as f:
         best_results = json.load(f)
+    print("Loaded best optimized parameters successfully.")
 else:
-    raise FileNotFoundError("Best optimized parameters file not found!")
+    raise FileNotFoundError(f"Best optimized parameters file not found at: {best_results_path}")
 
 # Initialize noise models
 noise_models = Noise_Models()
