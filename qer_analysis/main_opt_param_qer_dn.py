@@ -20,9 +20,6 @@ if not os.path.exists(REPO_NAME):
 else:
     print("Repository already cloned...")
 
-# Ensure results directory in repository
-os.makedirs(repo_dir, exist_ok=True)
-
 # Load best optimized parameters from JSON
 best_results_path = os.path.join(repo_dir, 'optimized_parameters_c.json')
 if os.path.exists(best_results_path):
