@@ -94,6 +94,10 @@ max_p_amplitude, max_p_phase = find_max_parameters_for_damping(P=1)
 print(f"Maximum parameter for amplitude damping QER < 0.12: {max_p_amplitude:.6f}")
 print(f"Maximum parameter for phase damping QER < 0.12: {max_p_phase:.6f}")
 
+# Initialize result containers for QER
+results_qer_circle = []
+results_qer_hypercube = []
+
 # Loop through the best results for circle and hypercube to perform QER analysis
 for topology, best_combination_c in [('circle', best_results.get("circle", [])), 
                                      ('hypercube', best_results.get("hypercube", []))]:
