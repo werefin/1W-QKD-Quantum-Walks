@@ -68,9 +68,10 @@ class QW_Circle:
         if self.F == 'I':
             pass # identity operation, do nothing
         elif self.F == 'X':
-            self.circuit.x(self.coin_r)
+            self.circuit.h(self.coin_r)
         elif self.F == 'Y':
-            self.circuit.y(self.coin_r)
+            self.circuit.h(self.coin_r)
+            self.circuit.s(self.coin_r)
         else:
             raise ValueError("Invalid operator type. Choose 'I', 'X', or 'Y'")
 
@@ -227,9 +228,10 @@ class QW_Hypercube:
         # Apply the specified operation to each qubit
         for qubit in range(len(coin_r)):
             if self.F == "X":
-                q_circuit.x(qubit)
+                q_circuit.h(qubit)
             elif self.F == "Y":
-                q_circuit.y(qubit)
+                q_circuit.h(qubit)
+                q_circuit.s(qubit)
             # Identity operator is the default behavior (no gate added)
         # Convert the circuit to an operator
         operator_F = Operator(q_circuit)
