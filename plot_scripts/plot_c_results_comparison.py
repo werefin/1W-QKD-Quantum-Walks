@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 
 # Define the path to the non-root user's plot folder
-normal_user = "david"
+normal_user = "normal_user"
 repo_dir = f"/home/{normal_user}/Desktop/plot"
 
 # Paths to the JSON files
