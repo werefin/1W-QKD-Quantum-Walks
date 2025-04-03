@@ -34,7 +34,7 @@ class QW_Circle:
 
     def _build_circuit(self):
         """
-        Build the quantum random walk circuit with the specified parameters
+        Build the quantum walk circuit with the specified parameters
         """
         # Initialize the walker and coin qubits
         self._initialize_circuit()
@@ -63,7 +63,7 @@ class QW_Circle:
 
     def _apply_F(self):
         """
-        Apply operator F to the coin qubit at the end of the walk
+        Apply operator F to the coin qubit at the beginning of the walk
         """
         if self.F == 'I':
             pass # identity operation, do nothing
@@ -239,7 +239,7 @@ class QW_Hypercube:
 
     def _build_circuit(self):
         """
-        Build the quantum random walk circuit for the hypercube
+        Build the quantum walk circuit for the hypercube
         """
         if self.coin_type == 'generic_rotation':
             # Apply the F operator before evolving the walk
