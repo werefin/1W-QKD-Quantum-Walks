@@ -1,4 +1,4 @@
-## 1W-QKD using QWs on circles and hypercubes
+## One-way QKD using quantum walks on circles and hypercubes
 
 ### Overview
 
